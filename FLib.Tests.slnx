@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FLib.ConfigBuilder/FLib.ConfigBuilder.csproj" />
+  <Project Path="FLib.Gen/FLib.Gen.csproj" />
+  <Project Path="FLib.Tests/FLib.Tests.csproj" />
+  <Project Path="FLib/FLib.csproj" />
+</Solution>

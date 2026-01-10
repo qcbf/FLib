@@ -1,0 +1,45 @@
+// ==================== qcbf@qq.com | <#= DateTime.Now.ToString("yyyy-MM-dd") #> ====================
+<#@ template language="C#" #>
+<#@ import namespace="System.Linq" #>
+
+using System;
+
+namespace FLib.WorldCores
+{
+    public partial class WorldCore
+    {
+<#
+    for (var i = 1; i <= 16; i++)
+    {
+        var genericParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"T{n}"));
+        var genericWheres = string.Join(" ", Enumerable.Range(1, i).Select(n => $"where T{n} : unmanaged"));
+        var methodParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"in T{n} v{n} = default"));
+        var builderAdds = string.Join("\n                ", Enumerable.Range(1, i).Select(n => $"builder.Add<T{n}>();"));
+        var setComponents = string.Join("\n            ", Enumerable.Range(1, i).Select(n => $"*chunk.Get<T{n}>(chunkEntityIdx) = v{n};"));
+        var setBits = string.Join("\n            ", Enumerable.Range(1, i)
+            .Select(n => $"BitArrayOperator.SetBit(ComponentRegistry.ComponentTypeMaskBuffer, ComponentRegistry.GetId<T{n}>(), true);"));
+#>
+        /// <summary>
+        /// 创建实体
+        /// </summary>
+        public unsafe Entity CreateEntity<<#= genericParams #>>(<#= methodParams #>) <#= genericWheres #>
+        {
+            Array.Clear(ComponentRegistry.ComponentTypeMaskBuffer);
+            <#= setBits #>
+            var hash = ComponentRegistry.GetHash(ComponentRegistry.ComponentTypeMaskBuffer);
+            if (!ArchetypeGroup.ArchetypeMap.TryGetValue(hash, out var archetype))
+            {
+                using var builder = new ArchetypeBuilder(<#= i #>);
+                <#= builderAdds #>
+                archetype = ArchetypeGroup.Create(hash, builder);
+            }
+            var et = archetype.CreateEntity(out var chunkEntityIdx);
+            var chunk = archetype.Chunks;
+            <#= setComponents #>
+            return et;
+        }
+<#
+    }
+#>
+    }
+}

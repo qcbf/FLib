@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+	
+	<ItemGroup>
+		<None Remove="**/*.meta" />
+		<None Remove="**/*.asmdef" />
+		<None Remove="**/package.json" />
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<NoWarn>1701;1702;NU1904;NU1903</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+        <ProjectReference Include="..\FLib\FLib.csproj" />
+    </ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="ExcelDataReader" Version="3.8.0" />
+	</ItemGroup>
+
+</Project>

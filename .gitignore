@@ -1,0 +1,13 @@
+**/.vs/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]in/
+**/[Ll]ogs/
+**/*.pubxml.user
+**/*.sln.*.user
+**/*.sln.user
+**/*.cs~*.TMP
+**/.idea/
+**/.vsconfig
+**/Publish/
+*.meta

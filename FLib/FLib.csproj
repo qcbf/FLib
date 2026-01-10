@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DefineConstants>FIXED_POINT_NUMBER</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="**/*.meta"/>
+        <None Remove="**/*.asmdef"/>
+        <None Remove="**/package.json"/>
+        <None Remove="**/csc.rsp"/>
+        
+        <None Update="Sources\WorldCores\Components\Components.tt">
+          <Generator>TextTemplatingFileGenerator</Generator>
+          <LastGenOutput>Components.cs</LastGenOutput>
+        </None>
+        <None Update="Sources\WorldCores\World\WorldCore.CreateEntity.tt">
+          <Generator>TextTemplatingFileGenerator</Generator>
+          <LastGenOutput>WorldCore.CreateEntity.cs</LastGenOutput>
+        </None>
+        <None Update="Sources\WorldCores\World\WorldCore.Get.tt">
+          <Generator>TextTemplatingFileGenerator</Generator>
+          <LastGenOutput>WorldCore.Get.cs</LastGenOutput>
+        </None>
+        <None Update="Sources\WorldCores\World\WorldCore.Query.tt">
+          <Generator>TextTemplatingFileGenerator</Generator>
+          <LastGenOutput>WorldCore.Query.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\FLib.Gen\FLib.Gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Sources\WorldCores\Components\Components.cs">
+        <DependentUpon>Components.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Sources\WorldCores\World\WorldCore.Get.cs">
+        <DependentUpon>WorldCore.Get.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Sources\WorldCores\World\WorldCore.Query.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>WorldCore.Query.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Sources\WorldCores\World\WorldCore.CreateEntity.cs">
+        <DependentUpon>WorldCore.CreateEntity.tt</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,38 @@
+// ==================== qcbf@qq.com | <#= DateTime.Now.ToString("yyyy-MM-dd") #> ====================
+<#@ template language="C#" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+
+using System;
+using System.Runtime.CompilerServices; 
+
+namespace FLib.WorldCores
+{
+<#
+    for (var i = 1; i <= 16; i++)
+    {
+        var genericParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"T{n}"));
+        var fields = string.Join("\n", Enumerable.Range(1, i).Select(n => $"        public readonly Ref<T{n}> R{n};"));
+        var ctorParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"Ref<T{n}> r{n}"));
+        var ctorBody = string.Join("; ", Enumerable.Range(1, i).Select(n => $"R{n} = r{n}"));
+        var toStringBody = string.Join(", ", Enumerable.Range(1, i).Select(n => $"{{R{n}}}"));
+        var genericWheres = string.Join(" ", Enumerable.Range(1, i).Select(n => $"where T{n} : unmanaged"));
+#>
+
+    [SkipLocalsInit]
+    public readonly ref struct Components<<#= genericParams #>> <#= genericWheres #>
+    {
+<#= fields #>
+        public override string ToString() => $"<#= toStringBody #>]";
+
+        [SkipLocalsInit]
+        public Components(<#= ctorParams #>)
+        {
+            <#= ctorBody #>;
+        }
+    }
+<#
+    }
+#>
+}

@@ -1,0 +1,35 @@
+// ==================== qcbf@qq.com | <#= DateTime.Now.ToString("yyyy-MM-dd") #> ====================
+<#@ template language="C#" #>
+<#@ import namespace="System.Linq" #>
+
+using System;
+using System.Diagnostics;
+
+namespace FLib.WorldCores
+{
+    public unsafe partial class WorldCore
+    {
+<#
+    for (var i = 2; i <= 16; i++)
+    {
+        var genericParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"T{n}"));
+        var genericWheres = string.Join(" ", Enumerable.Range(1, i).Select(n => $"where T{n} : unmanaged"));
+        var componentsArgs = string.Join(", ", Enumerable.Range(1, i).Select(n => $"new Ref<T{n}>(chunk.Get<T{n}>(idx))"));
+#>
+        /// <summary>
+        /// 
+        /// </summary>
+        public Components<<#= genericParams #>> GetSta<<#= genericParams #>>(in Entity et) <#= genericWheres #>
+        {
+            ref readonly var eti = ref EntityInfos.GetRef(et.Id);
+            Debug.Assert(eti.Version == et.Version, "version error");
+            var chunk = eti.Chunk;
+            var idx = eti.ChunkEntityIdx;
+            return new Components<<#= genericParams #>>(<#= componentsArgs #>);
+        }
+
+<#
+    }
+#>
+    }
+}

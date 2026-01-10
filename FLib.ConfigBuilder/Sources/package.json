@@ -1,0 +1,8 @@
+{
+  "name": "com.flib.config_builder",
+  "displayName": "FLib.ConfigBuilder",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "script",
+  "relatedPackages": {}
+}
