@@ -1,6 +1,6 @@
 # 为什么造这个轮子? 目标是实现下面的这几点
 
-- 极致高性能的实现方式, unity ecs的做法, 纯c#的实现, 可以方便迁移到linux等任何平台, 每个组件手动分配和管理内存(
+- 极致高性能的实现方式, unity ecs的做法, 纯c#的实现, 可以方便运行到linux等任何平台, 每个组件手动分配和管理内存(
   aligned_alloc), 无gc.  
   当然缺点和unity一样必须是unmanaged的struct, 如果需要managed的组件(class/struct)需要额外包裹一层, 会多一次间接寻址.  
   这样能做到极致的性能, 相比目前已有的纯c#实现的ecs库例如[genaray/Arch](https://github.com/genaray/Arch)理论上性能会强的多.
