@@ -8,11 +8,14 @@ using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
+    /// <summary>
+    /// 这里会对每个Component类型 首次使用时进行注册, 生成比较的id, size, info等等信息.
+    /// 目前是通过反射获取的, 后续会增加warmup接口, 或者直接通过source generator实现在编译时生成,运行时0首次注册开销.
+    /// </summary>
     public static class ComponentRegistry
     {
         [ThreadStatic] private static ulong[] _componentTypeMaskBuffer;
         public static ulong[] ComponentTypeMaskBuffer => _componentTypeMaskBuffer ??= new ulong[4];
-
         public static readonly Dictionary<Type, ComponentMeta> ComponentTypeMap = new(1024);
         public static ushort ComponentCount { get; private set; }
         private static ComponentInfo[] _componentInfos = new ComponentInfo[1024];
@@ -31,7 +34,7 @@ namespace FLib.WorldCores
         /// </summary>
         public static ComponentMeta GetMeta<T>()
         {
-            return ComponentGenericMap<T>.IsEmpty ? ComponentGenericMap<T>.Meta = Register(typeof(T), SizeOf<T>()) : ComponentGenericMap<T>.Meta;
+            return ComponentGenericMap<T>.IsEmpty ? ComponentGenericMap<T>.Init(Register(typeof(T), SizeOf<T>())) : ComponentGenericMap<T>.Meta;
         }
 
         /// <summary>
@@ -61,6 +64,22 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
+        public static ref readonly ComponentInfo GetInfo<T>()
+        {
+            return ref _componentInfos[GetMeta<T>().Id];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static ref readonly ComponentInfo GetInfo(Type type)
+        {
+            return ref _componentInfos[GetMeta(type).Id];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static ref readonly ComponentInfo GetInfo(in ComponentMeta meta)
         {
             return ref _componentInfos[meta.Id];
@@ -74,11 +93,11 @@ namespace FLib.WorldCores
             var id = new IncrementId(++ComponentCount);
             var cType = new ComponentMeta(id, size);
             ComponentTypeMap[type] = cType;
-            
+
             if (_componentInfos.Length <= id)
                 Array.Resize(ref _componentInfos, id + GlobalSetting.CapacityExpandSize);
             _componentInfos[id] = new ComponentInfo(type);
-            
+
             var maxBit = (int)Math.Ceiling(id.Raw / (float)BitArrayOperator.BitSize);
             if (ComponentTypeMaskBuffer.Length < maxBit)
                 _componentTypeMaskBuffer = new ulong[MathEx.GetNextPowerOfTwo(maxBit)];

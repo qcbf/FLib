@@ -44,7 +44,7 @@ namespace FLib.WorldCores
         public WorldCore(int entityCapacity = 2048)
         {
             ArchetypeGroup = new ArchetypeGroup(this);
-            DynamicComponent = new DynamicComponentGroupManager();
+            DynamicComponent = new DynamicComponentGroupManager(this);
             EntityInfos = new FixedIndexList<EntityInfo>(entityCapacity);
             EntityDynamicOffset = new FixedIndexList<ComponentTypeOffsetHelper>(entityCapacity >> 1);
         }
@@ -77,7 +77,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public Entity CreateEntity(in EntityBuilder builder, bool initMemory = true)
+        public unsafe Entity CreateEntity(in EntityBuilder builder, bool initMemory = true)
         {
             var hash = builder.ComputeHashCode();
             if (!ArchetypeGroup.ArchetypeMap.TryGetValue(hash, out var archetype))
@@ -89,17 +89,16 @@ namespace FLib.WorldCores
             }
 
             var et = archetype.CreateEntity(out var chunkEntityIdx);
-            ref readonly var components = ref builder.ComponentTypes;
+            var chunk = archetype.Chunks;
             if (initMemory)
             {
-                var chunk = archetype.Chunks;
+                ref readonly var components = ref builder.ComponentTypes;
                 for (var i = 0; i < components.Count; i++)
                     chunk.ClearMemory(chunkEntityIdx, components[i].Size, components[i].Id);
             }
 
-            for (var i = 0; i < components.Count; i++)
-            {
-            }
+            foreach (var (meta, invoker) in builder.Invokers)
+                invoker(ref *(byte*)chunk.Get(chunkEntityIdx, meta.Size, meta.Id), this, et);
 
             return et;
         }

@@ -36,6 +36,8 @@ namespace FLib.WorldCores
             var et = archetype.CreateEntity(out var chunkEntityIdx);
             var chunk = archetype.Chunks;
             <#= setComponents #>
+            <#= string.Join("\n            ", Enumerable.Range(1, i)
+                    .Select(n => $"ComponentGenericMap<T{n}>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T{n}>(chunkEntityIdx), this, et);")) #>
             return et;
         }
 <#

@@ -15,13 +15,13 @@ namespace FLib.WorldCores
             _index = _objects.Add(v) + 1;
         }
 
-        public void ComponentBegin(WorldCore world, Entity entity)
+        public void ComponentAwake(WorldCore world, Entity entity)
         {
             if (_index == 0)
                 _index = _objects.Add(default) + 1;
         }
 
-        public void ComponentEnd(WorldCore world, Entity entity)
+        public void ComponentDestroy(WorldCore world, Entity entity)
         {
             if (_index == 0) return;
             _objects.RemoveAt(_index - 1);

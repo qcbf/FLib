@@ -6,7 +6,13 @@ namespace FLib.WorldCores
 {
     public class DynamicComponentGroupManager
     {
+        public WorldCore World;
         public IDynamicComponentGroupable[] Groups = Array.Empty<IDynamicComponentGroupable>();
+
+        public DynamicComponentGroupManager(WorldCore world)
+        {
+            World = world;
+        }
 
 
         public DynamicComponentGroup<T> GetGroup<T>()
@@ -14,7 +20,7 @@ namespace FLib.WorldCores
             var id = ComponentRegistry.GetId<T>();
             if (id >= Groups.Length)
                 Groups = new IDynamicComponentGroupable[id + 1];
-            return (DynamicComponentGroup<T>)(Groups[id] ??= new DynamicComponentGroup<T>());
+            return (DynamicComponentGroup<T>)(Groups[id] ??= new DynamicComponentGroup<T>() { World = World });
         }
 
         public IDynamicComponentGroupable GetGroup(Type componentType)
@@ -22,7 +28,14 @@ namespace FLib.WorldCores
             var id = ComponentRegistry.GetId(componentType);
             if (id >= Groups.Length)
                 Groups = new IDynamicComponentGroupable[id + 1];
-            return Groups[id] ??= (IDynamicComponentGroupable)TypeAssistant.New(typeof(DynamicComponentGroup<>).MakeGenericType(componentType));
+            ref var group = ref Groups[id];
+            if (group == null)
+            {
+                group = (IDynamicComponentGroupable)TypeAssistant.New(typeof(DynamicComponentGroup<>).MakeGenericType(componentType));
+                group.World = World;
+            }
+
+            return group;
         }
     }
 }

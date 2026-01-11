@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
@@ -13,7 +14,9 @@ namespace FLib.WorldCores
         public Stack<int> Frees = new();
         public int Count;
 
+        public WorldCore World { get; set; }
         Array IDynamicComponentGroupable.Components => Components;
+
 
         public ref T this[in DynamicComponentContext ctx] => ref Components[ctx.ComponentIdx];
 
@@ -46,6 +49,9 @@ namespace FLib.WorldCores
             }
 
             ++Count;
+            ref var first = ref MemoryMarshal.GetArrayDataReference(Components);
+            first = ref Unsafe.Add(ref first, idx);
+            ComponentRegistry.GetInfo<T>().ComponentAwake?.Invoke(ref Unsafe.As<T, byte>(ref first), World, et);
             return idx;
         }
 
@@ -54,6 +60,7 @@ namespace FLib.WorldCores
         /// </summary>
         public void Free(in Entity et, int idx)
         {
+            ComponentRegistry.GetInfo<T>().ComponentDestroy?.Invoke(ref Unsafe.As<T, byte>(ref Components[idx]), World, et);
             Components[idx] = default;
             Frees.Push(idx);
             --Count;

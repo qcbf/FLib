@@ -6,6 +6,7 @@ namespace FLib.WorldCores
 {
     public interface IDynamicComponentGroupable
     {
+        WorldCore World { get; set; }
         Array Components { get; }
         void EnsureCapacity(int capacity);
 

@@ -1,4 +1,4 @@
-﻿// ==================== qcbf@qq.com | 2026-01-10 ====================
+﻿// ==================== qcbf@qq.com | 2026-01-11 ====================
 
 using System;
 
@@ -23,6 +23,7 @@ namespace FLib.WorldCores
             var et = archetype.CreateEntity(out var chunkEntityIdx);
             var chunk = archetype.Chunks;
             *chunk.Get<T1>(chunkEntityIdx) = v1;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -45,6 +46,8 @@ namespace FLib.WorldCores
             var chunk = archetype.Chunks;
             *chunk.Get<T1>(chunkEntityIdx) = v1;
             *chunk.Get<T2>(chunkEntityIdx) = v2;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -70,6 +73,9 @@ namespace FLib.WorldCores
             *chunk.Get<T1>(chunkEntityIdx) = v1;
             *chunk.Get<T2>(chunkEntityIdx) = v2;
             *chunk.Get<T3>(chunkEntityIdx) = v3;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -98,6 +104,10 @@ namespace FLib.WorldCores
             *chunk.Get<T2>(chunkEntityIdx) = v2;
             *chunk.Get<T3>(chunkEntityIdx) = v3;
             *chunk.Get<T4>(chunkEntityIdx) = v4;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -129,6 +139,11 @@ namespace FLib.WorldCores
             *chunk.Get<T3>(chunkEntityIdx) = v3;
             *chunk.Get<T4>(chunkEntityIdx) = v4;
             *chunk.Get<T5>(chunkEntityIdx) = v5;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -163,6 +178,12 @@ namespace FLib.WorldCores
             *chunk.Get<T4>(chunkEntityIdx) = v4;
             *chunk.Get<T5>(chunkEntityIdx) = v5;
             *chunk.Get<T6>(chunkEntityIdx) = v6;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -200,6 +221,13 @@ namespace FLib.WorldCores
             *chunk.Get<T5>(chunkEntityIdx) = v5;
             *chunk.Get<T6>(chunkEntityIdx) = v6;
             *chunk.Get<T7>(chunkEntityIdx) = v7;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -240,6 +268,14 @@ namespace FLib.WorldCores
             *chunk.Get<T6>(chunkEntityIdx) = v6;
             *chunk.Get<T7>(chunkEntityIdx) = v7;
             *chunk.Get<T8>(chunkEntityIdx) = v8;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -283,6 +319,15 @@ namespace FLib.WorldCores
             *chunk.Get<T7>(chunkEntityIdx) = v7;
             *chunk.Get<T8>(chunkEntityIdx) = v8;
             *chunk.Get<T9>(chunkEntityIdx) = v9;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -329,6 +374,16 @@ namespace FLib.WorldCores
             *chunk.Get<T8>(chunkEntityIdx) = v8;
             *chunk.Get<T9>(chunkEntityIdx) = v9;
             *chunk.Get<T10>(chunkEntityIdx) = v10;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -378,6 +433,17 @@ namespace FLib.WorldCores
             *chunk.Get<T9>(chunkEntityIdx) = v9;
             *chunk.Get<T10>(chunkEntityIdx) = v10;
             *chunk.Get<T11>(chunkEntityIdx) = v11;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -430,6 +496,18 @@ namespace FLib.WorldCores
             *chunk.Get<T10>(chunkEntityIdx) = v10;
             *chunk.Get<T11>(chunkEntityIdx) = v11;
             *chunk.Get<T12>(chunkEntityIdx) = v12;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T12>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T12>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -485,6 +563,19 @@ namespace FLib.WorldCores
             *chunk.Get<T11>(chunkEntityIdx) = v11;
             *chunk.Get<T12>(chunkEntityIdx) = v12;
             *chunk.Get<T13>(chunkEntityIdx) = v13;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T12>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T12>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T13>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T13>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -543,6 +634,20 @@ namespace FLib.WorldCores
             *chunk.Get<T12>(chunkEntityIdx) = v12;
             *chunk.Get<T13>(chunkEntityIdx) = v13;
             *chunk.Get<T14>(chunkEntityIdx) = v14;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T12>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T12>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T13>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T13>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T14>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T14>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -604,6 +709,21 @@ namespace FLib.WorldCores
             *chunk.Get<T13>(chunkEntityIdx) = v13;
             *chunk.Get<T14>(chunkEntityIdx) = v14;
             *chunk.Get<T15>(chunkEntityIdx) = v15;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T12>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T12>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T13>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T13>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T14>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T14>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T15>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T15>(chunkEntityIdx), this, et);
             return et;
         }
         /// <summary>
@@ -668,6 +788,22 @@ namespace FLib.WorldCores
             *chunk.Get<T14>(chunkEntityIdx) = v14;
             *chunk.Get<T15>(chunkEntityIdx) = v15;
             *chunk.Get<T16>(chunkEntityIdx) = v16;
+            ComponentGenericMap<T1>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T1>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T2>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T2>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T3>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T3>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T4>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T4>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T5>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T5>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T6>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T6>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T7>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T7>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T8>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T8>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T9>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T9>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T10>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T10>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T11>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T11>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T12>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T12>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T13>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T13>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T14>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T14>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T15>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T15>(chunkEntityIdx), this, et);
+            ComponentGenericMap<T16>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T16>(chunkEntityIdx), this, et);
             return et;
         }
     }

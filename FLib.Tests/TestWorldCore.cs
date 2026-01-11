@@ -1,5 +1,7 @@
 // ==================== qcbf@qq.com | 2026-01-03 ====================
 
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using FLib.WorldCores;
 
 namespace FLib.Tests;
@@ -51,7 +53,7 @@ public class TestWorldCore
         Assert.Equal(10, world.GetSta<Team>(player2).Val.Value);
         Assert.Equal(100, world.GetSta<Team>(enemy1).Val.Value);
         Assert.Equal("p1", world.GetStaMng<Player>(player1).Val.Name);
-        // Assert.Null(world.GetStaMng<Player>(player2).Val.Name);
+        Assert.Null(world.GetStaMng<Player>(player2).Val.Name);
 
         var results = new Queue<byte>([5, 10, 100]);
         world.Query<Team>((in et, ref v1) => Assert.Equal(v1.Value, results.Dequeue()));

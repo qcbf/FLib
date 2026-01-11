@@ -4,12 +4,17 @@ namespace FLib.WorldCores
 {
     public interface IComponentAwake
     {
-        public void ComponentBegin(WorldCore world, Entity entity);
+        public void ComponentAwake(WorldCore world, Entity entity);
+    }
+
+    public interface IComponentStart
+    {
+        public void ComponentStart(WorldCore world, Entity entity);
     }
 
     public interface IComponentDestroy
     {
-        public void ComponentEnd(WorldCore world, Entity entity);
+        public void ComponentDestroy(WorldCore world, Entity entity);
     }
 
     public interface IComponentEnable
@@ -24,6 +29,6 @@ namespace FLib.WorldCores
 
     public interface IComponentUpdate
     {
-        public void ComponentDisable(WorldCore world, Entity entity);
+        public void ComponentUpdate(WorldCore world, Entity entity);
     }
 }
