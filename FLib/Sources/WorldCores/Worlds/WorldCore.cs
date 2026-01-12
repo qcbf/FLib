@@ -1,8 +1,11 @@
 // ==================== qcbf@qq.com |2025-12-11 ====================
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
@@ -94,11 +97,11 @@ namespace FLib.WorldCores
             {
                 ref readonly var components = ref builder.ComponentTypes;
                 for (var i = 0; i < components.Count; i++)
-                    chunk.ClearMemory(chunkEntityIdx, components[i].Size, components[i].Id);
+                    chunk.ClearMemory(chunkEntityIdx, components[i]);
             }
 
             foreach (var (meta, invoker) in builder.Invokers)
-                invoker(ref *(byte*)chunk.Get(chunkEntityIdx, meta.Size, meta.Id), this, et);
+                invoker(ref *(byte*)chunk.Get(chunkEntityIdx, meta), this, et);
 
             return et;
         }
@@ -131,6 +134,34 @@ namespace FLib.WorldCores
         public bool HasEntity(Entity et)
         {
             return !et.IsEmpty && EntityInfos.Count > et.Id && EntityInfos.GetRef(et.Id).Version == et.Version;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public unsafe IList<object> GetAll(Entity et, IList<object> list = null)
+        {
+            list ??= new List<object>();
+            var eti = GetEntityInfo(et);
+            var chunk = eti.Chunk;
+            foreach (var meta in ArchetypeGroup[eti.ArchetypeIdx].ComponentTypes)
+                list.Add(chunk.GetObj(eti.ChunkEntityIdx, meta));
+
+            if (eti.HasDynamicComponent)
+            {
+                var offsets = EntityDynamicOffset[eti.DynamicComponentIdx].Offsets;
+                for (var i = 0; i < offsets.Length; i++)
+                {
+                    if (offsets[i] < 0) continue;
+                    var meta = ComponentRegistry.GetInfo(new IncrementId(i + 1)).Meta;
+                    var compIdx = EntityDynamicOffset[offsets[i]].Get(meta.Id);
+                    var val = DynamicComponent.GetGroup(meta.Type).Components.GetValue(compIdx);
+                    list.Add(val);
+                }
+            }
+
+            return list;
         }
 
         #endregion

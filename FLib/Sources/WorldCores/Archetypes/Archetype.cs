@@ -94,13 +94,19 @@ namespace FLib.WorldCores
             var et = *etChunk.GetEntity(eti.ChunkEntityIdx);
             var backEt = *Chunks.GetEntity(Chunks.Count - 1);
             ref var backEti = ref World.EntityInfos.GetRef(backEt.Id);
+
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
-                ref readonly var meta = ref ComponentTypes[i];
-                var etComp = etChunk.Get(eti.ChunkEntityIdx, meta.Size, meta.Id);
-                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)etComp, World, et);
-                Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIdx, meta.Size, meta.Id),
-                    etComp, ushort.MaxValue, meta.Size);
+                var meta = ComponentTypes[i];
+                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)etChunk.Get(eti.ChunkEntityIdx, meta), World, et);
+            }
+
+            for (var i = 0; i < ComponentTypes.Length; i++)
+            {
+                var meta = ComponentTypes[i];
+                Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIdx, meta),
+                    etChunk.Get(eti.ChunkEntityIdx, meta),
+                    ushort.MaxValue, meta.Size);
             }
 
             backEti.Chunk = etChunk;

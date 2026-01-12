@@ -15,7 +15,7 @@ namespace FLib.WorldCores
     public static class ComponentRegistry
     {
         [ThreadStatic] private static ulong[] _componentTypeMaskBuffer;
-        public static ulong[] ComponentTypeMaskBuffer => _componentTypeMaskBuffer ??= new ulong[4];
+        internal static ulong[] ComponentTypeMaskBuffer => _componentTypeMaskBuffer ??= new ulong[4];
         public static readonly Dictionary<Type, ComponentMeta> ComponentTypeMap = new(1024);
         public static ushort ComponentCount { get; private set; }
         private static ComponentInfo[] _componentInfos = new ComponentInfo[1024];
@@ -96,7 +96,7 @@ namespace FLib.WorldCores
 
             if (_componentInfos.Length <= id)
                 Array.Resize(ref _componentInfos, id + GlobalSetting.CapacityExpandSize);
-            _componentInfos[id] = new ComponentInfo(type);
+            _componentInfos[id] = new ComponentInfo(cType,type);
 
             var maxBit = (int)Math.Ceiling(id.Raw / (float)BitArrayOperator.BitSize);
             if (ComponentTypeMaskBuffer.Length < maxBit)

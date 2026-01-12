@@ -17,15 +17,15 @@ namespace FLib.WorldCores
         public void ComponentDestroy(WorldCore world, Entity entity);
     }
 
-    public interface IComponentEnable
-    {
-        public void ComponentEnable(WorldCore world, Entity entity);
-    }
-
-    public interface IComponentDisable
-    {
-        public void ComponentDisable(WorldCore world, Entity entity);
-    }
+    // public interface IComponentEnable
+    // {
+    //     public void ComponentEnable(WorldCore world, Entity entity);
+    // }
+    //
+    // public interface IComponentDisable
+    // {
+    //     public void ComponentDisable(WorldCore world, Entity entity);
+    // }
 
     public interface IComponentUpdate
     {

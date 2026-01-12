@@ -64,6 +64,7 @@ public class TestWorldCore
         Assert.Empty(results);
 
         //entity
+        Assert.Equal(["FLib.Tests.Player", "5", "FLib.Tests.Actor"], world.GetAll(player1).Select(v => v.ToString()));
         world.RemoveEntity(player1);
         Assert.False(world.HasEntity(player1));
         Assert.ThrowsAny<Exception>(() => world.GetSta<Team>(player1));

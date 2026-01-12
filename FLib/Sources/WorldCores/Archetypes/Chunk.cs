@@ -1,7 +1,10 @@
 // ==================== qcbf@qq.com |2026-01-02 ====================
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -72,19 +75,47 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public void* Get(ushort entityIdx, ushort componentSize, IncrementId componentId)
+        public void* Get(ushort entityIdx, in ComponentMeta meta)
         {
             Debug.Assert(entityIdx < Count);
-            return Buffer + ComponentOffset[componentId] + componentSize * entityIdx;
+            return Buffer + ComponentOffset[meta.Id] + meta.Size * entityIdx;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void ClearMemory(ushort entityIdx, ushort componentSize, IncrementId componentId)
+        public object GetObj(ushort entityIdx, in ComponentMeta meta)
+        {
+            var ptr = Get(entityIdx, meta);
+            object obj;
+            if (meta.Type.IsGenericType)
+            {
+                obj = Activator.CreateInstance(meta.Type);
+                var gch = GCHandle.Alloc(obj, GCHandleType.Pinned);
+                try
+                {
+                    System.Buffer.MemoryCopy(ptr, (void*)gch.AddrOfPinnedObject(), meta.Size, meta.Size);
+                }
+                finally
+                {
+                    gch.Free();
+                }
+            }
+            else
+            {
+                obj = Marshal.PtrToStructure((IntPtr)ptr, meta.Type);
+            }
+
+            return obj;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ClearMemory(ushort entityIdx, in ComponentMeta meta)
         {
             Debug.Assert(entityIdx < Count);
-            Unsafe.InitBlockUnaligned(Buffer + ComponentOffset[componentId] + componentSize * entityIdx, 0, componentSize);
+            Unsafe.InitBlockUnaligned(Buffer + ComponentOffset[meta.Id] + meta.Size * entityIdx, 0, meta.Size);
         }
 
         /// <summary>
@@ -98,13 +129,12 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public object[] GetAll(in ComponentMeta meta)
+        public IList GetAll(in ComponentMeta meta, IList list = null)
         {
-            var arr = new object[Count];
-            var ptr = Buffer + ComponentOffset[meta.Id];
-            for (var i = 0; i < Count; i++)
-                arr[i] = Marshal.PtrToStructure((IntPtr)ptr + meta.Size * i, meta.Type);
-            return arr;
+            list ??= new List<object>(Count);
+            for (ushort i = 0; i < Count; i++)
+                list.Add(GetObj(i, meta));
+            return list;
         }
     }
 }

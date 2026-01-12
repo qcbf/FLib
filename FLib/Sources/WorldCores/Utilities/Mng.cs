@@ -13,6 +13,8 @@ namespace FLib.WorldCores
 
         public ref T Val => ref _objects.GetRef(_index - 1);
 
+        public override string ToString() => Val.ToString();
+
         public Mng(in T v)
         {
             _index = _objects.Add(v) + 1;

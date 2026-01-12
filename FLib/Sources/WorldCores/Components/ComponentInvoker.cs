@@ -47,29 +47,29 @@ namespace FLib.WorldCores
             }
         }
 
-        internal static void ComponentEnable<T>(ref byte ptr, WorldCore world, Entity entity) where T : IComponentEnable
-        {
-            try
-            {
-                Unsafe.As<byte, T>(ref ptr).ComponentEnable(world, entity);
-            }
-            catch (Exception e)
-            {
-                Log.Error?.Write($"{entity} {e}", nameof(ComponentInvoker));
-            }
-        }
-
-        internal static void ComponentDisable<T>(ref byte ptr, WorldCore world, Entity entity) where T : IComponentDisable
-        {
-            try
-            {
-                Unsafe.As<byte, T>(ref ptr).ComponentDisable(world, entity);
-            }
-            catch (Exception e)
-            {
-                Log.Error?.Write($"{entity} {e}", nameof(ComponentInvoker));
-            }
-        }
+        // internal static void ComponentEnable<T>(ref byte ptr, WorldCore world, Entity entity) where T : IComponentEnable
+        // {
+        //     try
+        //     {
+        //         Unsafe.As<byte, T>(ref ptr).ComponentEnable(world, entity);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Log.Error?.Write($"{entity} {e}", nameof(ComponentInvoker));
+        //     }
+        // }
+        //
+        // internal static void ComponentDisable<T>(ref byte ptr, WorldCore world, Entity entity) where T : IComponentDisable
+        // {
+        //     try
+        //     {
+        //         Unsafe.As<byte, T>(ref ptr).ComponentDisable(world, entity);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Log.Error?.Write($"{entity} {e}", nameof(ComponentInvoker));
+        //     }
+        // }
 
         internal static void ComponentUpdate<T>(ref byte ptr, WorldCore world, Entity entity) where T : IComponentUpdate
         {

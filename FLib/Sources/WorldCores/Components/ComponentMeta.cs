@@ -9,7 +9,7 @@ namespace FLib.WorldCores
         public readonly IncrementId Id;
         public readonly ushort Size;
 
-        public override string ToString() => $"{Id}-{FIO.FormatSize(Size)}-{GetTypeName(Type)}";
+        public override string ToString() => $"{Id},{FIO.FormatSize(Size)},{GetTypeName(Type)}";
         public Type Type => ComponentRegistry.GetType(this);
 
         internal ComponentMeta(IncrementId id, ushort size)
