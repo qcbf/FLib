@@ -35,7 +35,7 @@ namespace FLib.WorldCores
             {
                 Array.Copy(Offsets, newOffsets, Offsets.Length);
             }
-            catch (Exception ex)
+            catch
             {
                 pool.Return(newOffsets);
                 throw;

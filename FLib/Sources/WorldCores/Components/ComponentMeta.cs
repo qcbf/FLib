@@ -20,6 +20,7 @@ namespace FLib.WorldCores
 
         public static implicit operator Type(in ComponentMeta meta) => meta.Type;
         public static implicit operator IncrementId(in ComponentMeta meta) => meta.Id;
+        public static implicit operator ComponentMeta(in IncrementId id) => new(id, 0);
 
         /// <summary>
         ///

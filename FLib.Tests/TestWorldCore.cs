@@ -63,17 +63,20 @@ public class TestWorldCore
         world.Query<Team>((in et, ref v1) => Assert.Equal(v1.Value, results.Dequeue()), new QueryFilter().None<Enemy>());
         Assert.Empty(results);
 
+        //entity
         world.RemoveEntity(player1);
         Assert.False(world.HasEntity(player1));
         Assert.ThrowsAny<Exception>(() => world.GetSta<Team>(player1));
         Assert.Equal(10, world.GetSta<Team>(player2).Val.Value);
         Assert.Equal(1, world.GetEntityInfo(player2).Chunk.Count);
 
+        // managed
         player1 = world.CreateEntity<Mng<Player>, Team, Actor>(v2: new Team() { Value = 6 });
         Assert.Equal(6, world.GetSta<Team>(player1).Val.Value);
         Assert.Equal(10, world.GetSta<Team>(player2).Val.Value);
         Assert.Equal(100, world.GetSta<Team>(enemy1).Val.Value);
 
+        // dynamic
         world.SetDyn(player1, new Buff() { Name = "abc" });
         Assert.True(world.HasDyn<Buff>(player1));
         Assert.Equal("abc", world.GetDyn<Buff>(player1).Name);
@@ -84,6 +87,11 @@ public class TestWorldCore
         world.SetDyn(player1, new Buff() { Name = "aaa" }, null);
         Assert.Equal("aaa", world.GetDyn<Buff>(player1).Name);
         world.RemoveDyn<Buff>(player1);
+        Assert.False(world.HasDyn<Buff>(player1));
+        Assert.Equal(0, world.DynamicComponent.GetGroup<Buff>().Count);
+        world.SetDyn(player1, new Buff() { Name = "abc2" });
+        Assert.Equal(1, world.DynamicComponent.GetGroup<Buff>().Count);
+        world.RemoveEntity(player1);
         Assert.Equal(0, world.DynamicComponent.GetGroup<Buff>().Count);
     }
 }

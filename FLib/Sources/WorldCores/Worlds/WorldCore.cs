@@ -111,7 +111,13 @@ namespace FLib.WorldCores
             ref readonly var eti = ref GetEntityInfo(et);
             if (eti.HasDynamicComponent)
             {
-                // working
+                for (var i = 0; i < EntityDynamicOffset[eti.DynamicComponentIdx].Offsets.Length; i++)
+                {
+                    var componentTypeOffset = EntityDynamicOffset[eti.DynamicComponentIdx].Offsets[i];
+                    if (componentTypeOffset < 0) continue;
+                    var type = ComponentRegistry.GetType(new IncrementId(i + 1));
+                    DynamicComponent.GetGroup(type).Free(et, componentTypeOffset);
+                }
             }
 
             ArchetypeGroup[eti.ArchetypeIdx].RemoveEntity(eti);

@@ -10,6 +10,7 @@ namespace FLib.WorldCores
         public ushort Id => (ushort)(Raw - 1);
         public bool IsEmpty => Raw == 0;
         public IncrementId(ushort raw) => Raw = raw;
+        public IncrementId(int raw) => Raw = checked((ushort)raw);
         public override string ToString() => Id.ToString();
         public static implicit operator ushort(in IncrementId id) => id.Id;
         public static implicit operator int(in IncrementId id) => id.Id;
