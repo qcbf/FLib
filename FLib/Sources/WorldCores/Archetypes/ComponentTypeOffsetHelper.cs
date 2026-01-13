@@ -28,6 +28,13 @@ namespace FLib.WorldCores
 
         public void ResizeOnPool(IncrementId newMaxId)
         {
+            if (newMaxId.IsEmpty)
+            {
+                ArrayPool<int>.Shared.Return(Offsets);
+                Offsets = null;
+                return;
+            }
+
             if (newMaxId.Raw <= Offsets.Length) return;
             var pool = ArrayPool<int>.Shared;
             var newOffsets = pool.Rent(newMaxId.Raw);

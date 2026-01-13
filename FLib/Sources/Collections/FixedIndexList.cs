@@ -73,7 +73,7 @@ namespace FLib
         public void RemoveAt(int index, bool clean)
         {
 #if DEBUG
-            if (!(Uses ??= new HashSet<int>()).Contains(index))
+            if (!(Uses ??= new HashSet<int>()).Remove(index))
                 throw new Exception($"not found {index}");
 #endif
             --Count;

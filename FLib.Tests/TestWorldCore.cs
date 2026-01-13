@@ -39,6 +39,7 @@ public class TestWorldCore
     public void Basic()
     {
         var world = new WorldCore();
+        ComponentRegistry.GetMeta<Buff>();
         var player1 = world.CreateEntity<Mng<Player>, Team, Actor>(v2: new Team() { Value = 5 }, v1: Mng.T(new Player() { Name = "p1" }));
         using var _ = new EntityBuilder().Add<Team>().Add<Actor>().AddMng<Player>().Finish(world, out var player2);
         world.SetSta(player2, new Team() { Value = 10 });
@@ -94,5 +95,9 @@ public class TestWorldCore
         Assert.Equal(1, world.DynamicComponent.GetGroup<Buff>().Count);
         world.RemoveEntity(player1);
         Assert.Equal(0, world.DynamicComponent.GetGroup<Buff>().Count);
+
+        // dispose
+        world.Dispose();
+        Assert.Equal(2, GlobalSetting.ChunkAllocator.FreePagesCount);
     }
 }

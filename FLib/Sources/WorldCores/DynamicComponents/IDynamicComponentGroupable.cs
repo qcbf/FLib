@@ -8,15 +8,14 @@ namespace FLib.WorldCores
     {
         WorldCore World { get; set; }
         Array Components { get; }
-        void EnsureCapacity(int capacity);
 
         /// <summary>
-        /// 
+        /// 分配一个动态组件
         /// </summary>
         int Alloc(in Entity et);
 
         /// <summary>
-        /// 
+        /// 释放动态组件
         /// </summary>
         void Free(in Entity et, int idx);
 
@@ -24,5 +23,10 @@ namespace FLib.WorldCores
         // /// 
         // /// </summary>
         // bool Has(Entity et, int idx);
+
+        /// <summary>
+        /// 预分配动态组件
+        /// </summary>
+        void EnsureCapacity(int count);
     }
 }

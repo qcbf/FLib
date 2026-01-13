@@ -14,10 +14,12 @@ namespace FLib.WorldCores
         public ushort ChunkEntityIdx;
         private ushort _dynamicComponentIdx;
 
+        public bool IsEmpty => Version == 0;
+
         /// <summary>
         /// 
         /// </summary>
-        public int DynamicComponentIdx
+        public int DynamicComponentSparseIdx
         {
             readonly get => _dynamicComponentIdx - 1;
             set => _dynamicComponentIdx = checked((ushort)(value + 1));

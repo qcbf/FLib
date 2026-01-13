@@ -4,6 +4,9 @@ using System;
 
 namespace FLib.WorldCores
 {
+    /// <summary>
+    /// 动态组件组 管理器
+    /// </summary>
     public class DynamicComponentGroupManager
     {
         public WorldCore World;
@@ -14,7 +17,11 @@ namespace FLib.WorldCores
             World = world;
         }
 
-
+        /// <summary>
+        /// 获取动态组件组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public DynamicComponentGroup<T> GetGroup<T>()
         {
             var id = ComponentRegistry.GetId<T>();
@@ -23,6 +30,11 @@ namespace FLib.WorldCores
             return (DynamicComponentGroup<T>)(Groups[id] ??= new DynamicComponentGroup<T>() { World = World });
         }
 
+        /// <summary>
+        /// 获取动态组件组
+        /// </summary>
+        /// <param name="componentType"></param>
+        /// <returns></returns>
         public IDynamicComponentGroupable GetGroup(Type componentType)
         {
             var id = ComponentRegistry.GetId(componentType);

@@ -15,6 +15,8 @@ namespace FLib.WorldCores
         private readonly Page _pages;
         private readonly ConcurrentStack<IntPtr> _freePages = new();
 
+        public int FreePagesCount => _freePages.Count;
+
         private class Page
         {
             public readonly byte* FirstPtr;

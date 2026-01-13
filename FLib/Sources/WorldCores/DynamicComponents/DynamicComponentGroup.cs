@@ -29,6 +29,9 @@ namespace FLib.WorldCores
         //     return idx < Components.Length && Components[idx].DynamicComponentContext.Entity == et;
         // }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void EnsureCapacity(int capacity)
         {
             if (Components.Length >= capacity) return;

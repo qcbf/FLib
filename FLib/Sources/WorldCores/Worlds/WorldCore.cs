@@ -1,6 +1,7 @@
 // ==================== qcbf@qq.com |2025-12-11 ====================
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -9,12 +10,12 @@ using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
-    public partial class WorldCore : FEvent, IDisposable
+    public partial class WorldCore : FEvent, IDisposable, IEnumerable<Entity>
     {
         /// <summary>
         /// 
         /// </summary>
-        public readonly ArchetypeGroup ArchetypeGroup;
+        public ArchetypeGroup ArchetypeGroup;
 
         /// <summary>
         /// 
@@ -24,7 +25,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public FixedIndexList<ComponentTypeOffsetHelper> EntityDynamicOffset;
+        public FixedIndexList<(ComponentTypeOffsetHelper DenseIndexes, int Size)> DynamicComponentSparse;
 
         /// <summary>
         /// 
@@ -41,15 +42,17 @@ namespace FLib.WorldCores
         /// </summary>
         public ushort GenVersion() => unchecked(++VersionIncrement == 0 ? ++VersionIncrement : VersionIncrement);
 
+        public bool IsDisposed => ArchetypeGroup == null;
+
         /// <summary>
         /// 
         /// </summary>
-        public WorldCore(int entityCapacity = 2048)
+        public WorldCore(int entityCapacity = 1024)
         {
             ArchetypeGroup = new ArchetypeGroup(this);
             DynamicComponent = new DynamicComponentGroupManager(this);
             EntityInfos = new FixedIndexList<EntityInfo>(entityCapacity);
-            EntityDynamicOffset = new FixedIndexList<ComponentTypeOffsetHelper>(entityCapacity >> 1);
+            DynamicComponentSparse = new(entityCapacity >> 1);
         }
 
         #region entity
@@ -114,12 +117,14 @@ namespace FLib.WorldCores
             ref readonly var eti = ref GetEntityInfo(et);
             if (eti.HasDynamicComponent)
             {
-                for (var i = 0; i < EntityDynamicOffset[eti.DynamicComponentIdx].Offsets.Length; i++)
+                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
+                var denseIndexes = sparse.DenseIndexes.Offsets;
+                for (var i = 0; i < sparse.Size; i++)
                 {
-                    var componentTypeOffset = EntityDynamicOffset[eti.DynamicComponentIdx].Offsets[i];
-                    if (componentTypeOffset < 0) continue;
+                    var denseIdx = denseIndexes[i];
+                    if (denseIdx < 0) continue;
                     var type = ComponentRegistry.GetType(new IncrementId(i + 1));
-                    DynamicComponent.GetGroup(type).Free(et, componentTypeOffset);
+                    DynamicComponent.GetGroup(type).Free(et, denseIdx);
                 }
             }
 
@@ -140,7 +145,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public unsafe IList<object> GetAll(Entity et, IList<object> list = null)
+        public IList<object> GetAll(Entity et, IList<object> list = null)
         {
             list ??= new List<object>();
             var eti = GetEntityInfo(et);
@@ -150,12 +155,14 @@ namespace FLib.WorldCores
 
             if (eti.HasDynamicComponent)
             {
-                var offsets = EntityDynamicOffset[eti.DynamicComponentIdx].Offsets;
-                for (var i = 0; i < offsets.Length; i++)
+                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
+                var denseIndexes = sparse.DenseIndexes.Offsets;
+                for (var i = 0; i < sparse.Size; i++)
                 {
-                    if (offsets[i] < 0) continue;
+                    var denseIdx = denseIndexes[i];
+                    if (denseIdx < 0) continue;
                     var meta = ComponentRegistry.GetInfo(new IncrementId(i + 1)).Meta;
-                    var compIdx = EntityDynamicOffset[offsets[i]].Get(meta.Id);
+                    var compIdx = DynamicComponentSparse[denseIdx].DenseIndexes.Get(meta.Id);
                     var val = DynamicComponent.GetGroup(meta.Type).Components.GetValue(compIdx);
                     list.Add(val);
                 }
@@ -228,9 +235,9 @@ namespace FLib.WorldCores
         /// </summary>
         public ref T GetDyn<T>(Entity et)
         {
-            var dynIdx = GetEntityInfo(et).DynamicComponentIdx;
+            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIdx;
             Debug.Assert(dynIdx >= 0);
-            var compIdx = EntityDynamicOffset[dynIdx].Get<T>();
+            var compIdx = DynamicComponentSparse[dynIdx].DenseIndexes.Get<T>();
             return ref DynamicComponent.GetGroup<T>().Components[compIdx];
         }
 
@@ -239,9 +246,9 @@ namespace FLib.WorldCores
         /// </summary>
         public object GetDyn(Entity et, Type type)
         {
-            var dynIdx = GetEntityInfo(et).DynamicComponentIdx;
+            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIdx;
             Debug.Assert(dynIdx >= 0);
-            var compIdx = EntityDynamicOffset[dynIdx].Get(type);
+            var compIdx = DynamicComponentSparse[dynIdx].DenseIndexes.Get(type);
             return DynamicComponent.GetGroup(type).Components.GetValue(compIdx);
         }
 
@@ -271,8 +278,8 @@ namespace FLib.WorldCores
         /// </summary>
         public void RemoveDyn<T>(Entity et)
         {
-            ref var componentTypeOffset = ref EntityDynamicOffset.GetRef(GetEntityInfo(et).DynamicComponentIdx);
-            var compIdx = componentTypeOffset.GetAndClear(ComponentRegistry.GetId<T>());
+            ref var sparse = ref DynamicComponentSparse.GetRef(GetEntityInfo(et).DynamicComponentSparseIdx);
+            var compIdx = sparse.DenseIndexes.GetAndClear(ComponentRegistry.GetId<T>());
             DynamicComponent.GetGroup<T>().Free(et, compIdx);
         }
 
@@ -281,8 +288,8 @@ namespace FLib.WorldCores
         /// </summary>
         public void RemoveDyn(Entity et, Type type)
         {
-            ref var componentTypeOffset = ref EntityDynamicOffset.GetRef(GetEntityInfo(et).DynamicComponentIdx);
-            var compIdx = componentTypeOffset.GetAndClear(ComponentRegistry.GetId(type));
+            ref var sparse = ref DynamicComponentSparse.GetRef(GetEntityInfo(et).DynamicComponentSparseIdx);
+            var compIdx = sparse.DenseIndexes.GetAndClear(ComponentRegistry.GetId(type));
             DynamicComponent.GetGroup(type).Free(et, compIdx);
         }
 
@@ -292,7 +299,7 @@ namespace FLib.WorldCores
         public bool HasDyn<T>(Entity et)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return eti.HasDynamicComponent && EntityDynamicOffset[eti.DynamicComponentIdx].Has<T>();
+            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIdx].DenseIndexes.Has<T>();
         }
 
         /// <summary>
@@ -301,7 +308,7 @@ namespace FLib.WorldCores
         public bool HasDyn(Entity et, Type componentType)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return eti.HasDynamicComponent && EntityDynamicOffset[eti.DynamicComponentIdx].Has(ComponentRegistry.GetId(componentType));
+            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIdx].DenseIndexes.Has(ComponentRegistry.GetId(componentType));
         }
 
         /// <summary>
@@ -314,18 +321,18 @@ namespace FLib.WorldCores
             int compIdx;
             if (eti.HasDynamicComponent)
             {
-                ref var componentTypeOffset = ref EntityDynamicOffset.GetRef(eti.DynamicComponentIdx);
-                if (!componentTypeOffset.TryGet(componentId, out compIdx))
+                ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+                if (!sparse.DenseIndexes.TryGet(componentId, out compIdx))
                 {
-                    componentTypeOffset.ResizeOnPool(componentId);
-                    compIdx = componentTypeOffset[componentId] = group.Alloc(et);
+                    sparse.DenseIndexes.ResizeOnPool(componentId);
+                    compIdx = sparse.DenseIndexes[componentId] = group.Alloc(et);
                 }
             }
             else
             {
                 compIdx = group.Alloc(et);
-                var componentTypeOffset = new ComponentTypeOffsetHelper(componentId, true) { [componentId] = compIdx };
-                eti.DynamicComponentIdx = EntityDynamicOffset.Add(componentTypeOffset);
+                var sparseIndexes = new ComponentTypeOffsetHelper(componentId, true) { [componentId] = compIdx };
+                eti.DynamicComponentSparseIdx = DynamicComponentSparse.Add((sparseIndexes, componentId.Raw));
             }
 
             return compIdx;
@@ -334,10 +341,61 @@ namespace FLib.WorldCores
         #endregion
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerator<Entity> GetEnumerator()
+        {
+            var count = EntityInfos.Count;
+            for (ushort i = 0; count > 0; i++)
+            {
+                if (EntityInfos[i].IsEmpty) continue;
+                --count;
+                yield return new Entity(i, EntityInfos[i].Version);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
+            if (IsDisposed) return;
+
+            foreach (var et in this)
+            {
+                try
+                {
+                    RemoveEntity(et);
+                }
+                catch (Exception e)
+                {
+                    Log.Error?.Write($"{et}  {e}", nameof(WorldCore), nameof(Dispose));
+                }
+            }
+
+            for (ushort i = 0; i < ArchetypeGroup.Count; i++)
+            {
+                try
+                {
+                    ArchetypeGroup[i].ClearChunks();
+                }
+                catch (Exception e)
+                {
+                    Log.Error?.Write($"{i}  {e}", nameof(WorldCore), nameof(Dispose));
+                }
+            }
+
+            for (var i = 0; i < DynamicComponentSparse.Count; i++)
+                DynamicComponentSparse[i].DenseIndexes.ResizeOnPool(default);
+
+            ArchetypeGroup = null;
             GC.SuppressFinalize(this);
-            // working...
         }
     }
 }
