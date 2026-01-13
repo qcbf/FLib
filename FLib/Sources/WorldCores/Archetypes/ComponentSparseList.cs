@@ -6,50 +6,50 @@ using System.Diagnostics;
 
 namespace FLib.WorldCores
 {
-    public struct ComponentTypeOffsetHelper
+    public struct ComponentSparseList
     {
-        public int[] Offsets;
+        public int[] List;
 
         public int this[IncrementId componentId]
         {
             get => Get(componentId);
-            set => Offsets[componentId] = value;
+            set => List[componentId] = value;
         }
 
-        public ComponentTypeOffsetHelper(IncrementId maxId, bool isPooledArray) : this(isPooledArray ? ArrayPool<int>.Shared.Rent(maxId.Raw) : new int[maxId.Raw])
+        public ComponentSparseList(IncrementId maxId, bool isPooledArray) : this(isPooledArray ? ArrayPool<int>.Shared.Rent(maxId.Raw) : new int[maxId.Raw])
         {
         }
 
-        public ComponentTypeOffsetHelper(int[] offsets)
+        public ComponentSparseList(int[] list)
         {
-            Offsets = offsets;
-            Array.Fill(Offsets, -1);
+            List = list;
+            Array.Fill(List, -1);
         }
 
         public void ResizeOnPool(IncrementId newMaxId)
         {
             if (newMaxId.IsEmpty)
             {
-                ArrayPool<int>.Shared.Return(Offsets);
-                Offsets = null;
+                ArrayPool<int>.Shared.Return(List);
+                List = null;
                 return;
             }
 
-            if (newMaxId.Raw <= Offsets.Length) return;
+            if (newMaxId.Raw <= List.Length) return;
             var pool = ArrayPool<int>.Shared;
-            var newOffsets = pool.Rent(newMaxId.Raw);
+            var list = pool.Rent(newMaxId.Raw);
             try
             {
-                Array.Copy(Offsets, newOffsets, Offsets.Length);
+                Array.Copy(List, list, List.Length);
             }
             catch
             {
-                pool.Return(newOffsets);
+                pool.Return(list);
                 throw;
             }
 
-            pool.Return(Offsets);
-            Offsets = newOffsets;
+            pool.Return(List);
+            List = list;
         }
 
         public bool TryGet(Type type, out int idx)
@@ -64,13 +64,13 @@ namespace FLib.WorldCores
 
         public bool TryGet(IncrementId componentId, out int idx)
         {
-            if (Offsets.Length < componentId)
+            if (List.Length < componentId)
             {
                 idx = -1;
                 return false;
             }
 
-            return (idx = Offsets[componentId]) >= 0;
+            return (idx = List[componentId]) >= 0;
         }
 
         public int Get(Type type) => Get(ComponentRegistry.GetId(type));
@@ -79,11 +79,8 @@ namespace FLib.WorldCores
         public int Get(IncrementId componentId)
         {
             Debug.Assert(Has(componentId), "not found component");
-            return Offsets[componentId];
+            return List[componentId];
         }
-
-        public bool Has<T>() => Has(ComponentRegistry.GetId<T>());
-        public bool Has(IncrementId componentId) => componentId.Raw <= Offsets.Length && Offsets[componentId] >= 0;
 
         public int GetAndClear(IncrementId componentId)
         {
@@ -91,5 +88,8 @@ namespace FLib.WorldCores
             this[componentId] = -1;
             return temp;
         }
+
+        public bool Has<T>() => Has(ComponentRegistry.GetId<T>());
+        public bool Has(IncrementId componentId) => componentId.Raw <= List.Length && List[componentId] >= 0;
     }
 }

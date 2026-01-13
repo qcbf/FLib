@@ -56,12 +56,13 @@ public class TestWorldCore
         Assert.Equal("p1", world.GetStaMng<Player>(player1).Val.Name);
         Assert.Null(world.GetStaMng<Player>(player2).Val.Name);
 
-        var results = new Queue<byte>([5, 10, 100]);
-        world.Query<Team>((in et, ref v1) => Assert.Equal(v1.Value, results.Dequeue()));
+        // query
+        var results = new Queue<int>([5, 10, 100]);
+        world.Query<Team>((_, ref v1) => Assert.Equal(v1.Value, results.Dequeue()));
         Assert.Empty(results);
 
-        results = new Queue<byte>([5, 10]);
-        world.Query<Team>((in et, ref v1) => Assert.Equal(v1.Value, results.Dequeue()), new QueryFilter().None<Enemy>());
+        results = new Queue<int>([5, 10]);
+        world.Query<Team>((_, ref v1) => Assert.Equal(v1.Value, results.Dequeue()), new QueryFilter().None<Enemy>());
         Assert.Empty(results);
 
         //entity
@@ -80,6 +81,10 @@ public class TestWorldCore
 
         // dynamic
         world.SetDyn(player1, new Buff() { Name = "abc" });
+        results = new Queue<int>([player2.Version, enemy1.Version]);
+        world.Query(et => Assert.Equal(results.Dequeue(), et.Version), new QueryFilter().None<Buff>());
+        Assert.Empty(results);
+
         Assert.True(world.HasDyn<Buff>(player1));
         Assert.Equal("abc", world.GetDyn<Buff>(player1).Name);
         Assert.Equal("abc", ((Buff)world.GetDyn(player1, typeof(Buff))).Name);

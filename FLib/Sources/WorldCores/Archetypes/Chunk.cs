@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
-    public unsafe class Chunk : IObjectPoolActivatable, IObjectPoolDeactivatable
+    public sealed unsafe class Chunk : IObjectPoolActivatable, IObjectPoolDeactivatable
     {
         /// <summary>
         /// head: [entity...]
@@ -26,7 +26,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public ComponentTypeOffsetHelper ComponentOffset;
+        public ComponentSparseList Sparse;
 
         /// <summary>
         /// 
@@ -41,7 +41,7 @@ namespace FLib.WorldCores
         void IObjectPoolDeactivatable.ObjectPoolDeactivatable()
         {
             GlobalSetting.ChunkAllocator.Free(ref Buffer);
-            ComponentOffset = default;
+            Sparse = default;
             Count = 0;
             Previous = null;
         }
@@ -69,7 +69,7 @@ namespace FLib.WorldCores
         public T* Get<T>(ushort entityIdx) where T : unmanaged
         {
             Debug.Assert(entityIdx < Count);
-            return (T*)(Buffer + ComponentOffset.Get<T>()) + entityIdx;
+            return (T*)(Buffer + Sparse.Get<T>()) + entityIdx;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace FLib.WorldCores
         public void* Get(ushort entityIdx, in ComponentMeta meta)
         {
             Debug.Assert(entityIdx < Count);
-            return Buffer + ComponentOffset[meta.Id] + meta.Size * entityIdx;
+            return Buffer + Sparse[meta.Id] + meta.Size * entityIdx;
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace FLib.WorldCores
         public void ClearMemory(ushort entityIdx, in ComponentMeta meta)
         {
             Debug.Assert(entityIdx < Count);
-            Unsafe.InitBlockUnaligned(Buffer + ComponentOffset[meta.Id] + meta.Size * entityIdx, 0, meta.Size);
+            Unsafe.InitBlockUnaligned(Buffer + Sparse[meta.Id] + meta.Size * entityIdx, 0, meta.Size);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace FLib.WorldCores
         /// </summary>
         public Span<T> GetAll<T>() where T : unmanaged
         {
-            return new Span<T>(Buffer + ComponentOffset[ComponentGenericMap<T>.Id], Count);
+            return new Span<T>(Buffer + Sparse[ComponentGenericMap<T>.Id], Count);
         }
 
         /// <summary>

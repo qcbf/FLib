@@ -9,6 +9,40 @@ namespace FLib.WorldCores
 {
     public unsafe partial class WorldCore
     {
+#pragma warning disable CS0649
+        [ThreadStatic] private static QueryFilter _default;
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query(Action<Entity> handler)
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query(Action<Entity> handler, QueryFilter filter)
+        {
+            using var query = new ChunkQueryEnumerator(this, filter);
+            while (query.MoveNext())
+            {
+                var chunk = query.Current;
+                var entity = chunk.GetEntity(0);
+                for (var i = 0; i < chunk.Count; i++)
+                    handler(*(entity + i));
+            }
+        }
+
 <#
     for (var i = 1; i <= 16; i++)
     {
@@ -17,12 +51,27 @@ namespace FLib.WorldCores
         var allFilterMask = string.Join("\n            ", Enumerable.Range(1, i).Select(n => $"QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T{n}>());"));
 #>
 
-        public delegate void QueryHandler<<#= genericParams #>>(in Entity et, <#= string.Join(", ", Enumerable.Range(1, i).Select(n => $"ref T{n} v{n}")) #>);
+        public delegate void QueryHandler<<#= genericParams #>>(Entity et, <#= string.Join(", ", Enumerable.Range(1, i).Select(n => $"ref T{n} v{n}")) #>);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<<#= genericParams #>>(QueryHandler<<#= genericParams #>> handler, QueryFilter filter = default) <#= genericWheres #>
+        public void Query<<#= genericParams #>>(QueryHandler<<#= genericParams #>> handler) <#= genericWheres #>
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<<#= genericParams #>>(QueryHandler<<#= genericParams #>> handler, QueryFilter filter) <#= genericWheres #>
         {
             <#= allFilterMask #>
             using var query = new ChunkQueryEnumerator(this, filter);

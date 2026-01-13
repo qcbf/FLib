@@ -36,6 +36,10 @@
           <Generator>TextTemplatingFileGenerator</Generator>
           <LastGenOutput>WorldCore.CreateEntity.cs</LastGenOutput>
         </None>
+        <None Update="Sources\WorldCores\Worlds\WorldCore.Query.tt">
+          <Generator>TextTemplatingFileGenerator</Generator>
+          <LastGenOutput>WorldCore.Query.cs</LastGenOutput>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -63,6 +67,9 @@
       </Compile>
       <Compile Update="Sources\WorldCores\Worlds\WorldCore.CreateEntity.cs">
         <DependentUpon>WorldCore.CreateEntity.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Sources\WorldCores\Worlds\WorldCore.Query.cs">
+        <DependentUpon>WorldCore.Query.tt</DependentUpon>
       </Compile>
     </ItemGroup>
 

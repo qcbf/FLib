@@ -1,10 +1,11 @@
 ﻿// ==================== qcbf@qq.com |2025-12-28 ====================
 
 using System;
+using System.Buffers;
 
 namespace FLib.WorldCores
 {
-    public unsafe class Archetype
+    public sealed unsafe class Archetype : IDisposable
     {
         /// <summary>
         /// 
@@ -14,7 +15,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public readonly ulong[] ComponentMask;
+        public ulong[] ComponentMask;
 
         /// <summary>
         /// 
@@ -24,7 +25,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public readonly ComponentTypeOffsetHelper ComponentOffset;
+        public readonly ComponentSparseList Sparse;
 
         /// <summary>
         /// 
@@ -53,16 +54,16 @@ namespace FLib.WorldCores
             Idx = idx;
             MaxComponentId = builder.MaxComponentId;
             ComponentTypes = builder.ComponentTypes.ToArray();
-            ComponentMask = new ulong[BitArrayOperator.GetBitsLength(MaxComponentId.Raw)];
+            ComponentMask = ArrayPool<ulong>.Shared.Rent(BitArrayOperator.GetBitsLength(MaxComponentId.Raw));
             EntitiesPerChunk = (int)(GlobalSetting.ChunkAllocator.ChunkSize / (builder.ComponentsSize + sizeof(Entity)));
-            ComponentOffset = new ComponentTypeOffsetHelper(MaxComponentId, false);
-            var byteOffset = EntitiesPerChunk * sizeof(Entity);
+            Sparse = new ComponentSparseList(MaxComponentId, false);
+            var offset = EntitiesPerChunk * sizeof(Entity);
             for (ushort i = 0; i < ComponentTypes.Length; i++)
             {
                 ref readonly var meta = ref ComponentTypes[i];
-                ComponentOffset[meta.Id] = byteOffset;
+                Sparse[meta.Id] = offset;
                 BitArrayOperator.SetBit(ComponentMask, meta.Id, true);
-                byteOffset += meta.Size * EntitiesPerChunk;
+                offset += meta.Size * EntitiesPerChunk;
             }
         }
 
@@ -75,7 +76,7 @@ namespace FLib.WorldCores
             {
                 var newChunk = GlobalObjectPool<Chunk>.Create();
                 newChunk.Previous = Chunks;
-                newChunk.ComponentOffset = ComponentOffset;
+                newChunk.Sparse = Sparse;
                 Chunks = newChunk;
             }
 
@@ -123,7 +124,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public void ClearChunks()
+        public void Dispose()
         {
             var chunk = Chunks;
             Chunks = null;
@@ -133,6 +134,25 @@ namespace FLib.WorldCores
                 chunk = chunk.Previous;
                 GlobalObjectPool<Chunk>.Release(temp);
             }
+
+            ArrayPool<ulong>.Shared.Return(ComponentMask);
+            ComponentMask = null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetMask(IncrementId componentId, bool value)
+        {
+            if (ComponentMask.Length < BitArrayOperator.GetBitsLength(componentId.Raw))
+            {
+                var newMask = ArrayPool<ulong>.Shared.Rent(BitArrayOperator.GetBitsLength(componentId.Raw));
+                ComponentMask.CopyTo(newMask, 0);
+                ArrayPool<ulong>.Shared.Return(ComponentMask);
+                ComponentMask = newMask;
+            }
+
+            BitArrayOperator.SetBit(ComponentMask, componentId, value);
         }
     }
 }

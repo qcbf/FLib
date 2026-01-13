@@ -1,16 +1,68 @@
-﻿// ==================== qcbf@qq.com | 2026-01-10 ====================
+﻿// ==================== qcbf@qq.com | 2026-01-13 ====================
+
+using System;
+using System.Diagnostics;
 
 namespace FLib.WorldCores
 {
     public unsafe partial class WorldCore
     {
+#pragma warning disable CS0649
+        [ThreadStatic] private static QueryFilter _default;
 
-        public delegate void QueryHandler<T1>(in Entity et, ref T1 v1);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1>(QueryHandler<T1> handler, QueryFilter filter = default) where T1 : unmanaged
+        public void Query(Action<Entity> handler)
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query(Action<Entity> handler, QueryFilter filter)
+        {
+            using var query = new ChunkQueryEnumerator(this, filter);
+            while (query.MoveNext())
+            {
+                var chunk = query.Current;
+                var entity = chunk.GetEntity(0);
+                for (var i = 0; i < chunk.Count; i++)
+                    handler(*(entity + i));
+            }
+        }
+
+
+        public delegate void QueryHandler<T1>(Entity et, ref T1 v1);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1>(QueryHandler<T1> handler) where T1 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1>(QueryHandler<T1> handler, QueryFilter filter) where T1 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             using var query = new ChunkQueryEnumerator(this, filter);
@@ -25,12 +77,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2>(in Entity et, ref T1 v1, ref T2 v2);
+        public delegate void QueryHandler<T1, T2>(Entity et, ref T1 v1, ref T2 v2);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2>(QueryHandler<T1, T2> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged
+        public void Query<T1, T2>(QueryHandler<T1, T2> handler) where T1 : unmanaged where T2 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2>(QueryHandler<T1, T2> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -47,12 +114,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3);
+        public delegate void QueryHandler<T1, T2, T3>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3>(QueryHandler<T1, T2, T3> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged
+        public void Query<T1, T2, T3>(QueryHandler<T1, T2, T3> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3>(QueryHandler<T1, T2, T3> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -71,12 +153,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4);
+        public delegate void QueryHandler<T1, T2, T3, T4>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4>(QueryHandler<T1, T2, T3, T4> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged
+        public void Query<T1, T2, T3, T4>(QueryHandler<T1, T2, T3, T4> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4>(QueryHandler<T1, T2, T3, T4> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -97,12 +194,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5>(QueryHandler<T1, T2, T3, T4, T5> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged
+        public void Query<T1, T2, T3, T4, T5>(QueryHandler<T1, T2, T3, T4, T5> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5>(QueryHandler<T1, T2, T3, T4, T5> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -125,12 +237,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6>(QueryHandler<T1, T2, T3, T4, T5, T6> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6>(QueryHandler<T1, T2, T3, T4, T5, T6> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6>(QueryHandler<T1, T2, T3, T4, T5, T6> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -155,12 +282,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7>(QueryHandler<T1, T2, T3, T4, T5, T6, T7> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7>(QueryHandler<T1, T2, T3, T4, T5, T6, T7> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7>(QueryHandler<T1, T2, T3, T4, T5, T6, T7> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -187,12 +329,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -221,12 +378,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -257,12 +429,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -295,12 +482,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -335,12 +537,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -377,12 +594,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -421,12 +653,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -467,12 +714,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14, ref T15 v15);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14, ref T15 v15);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());
@@ -515,12 +777,27 @@ namespace FLib.WorldCores
         }
 
 
-        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(in Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14, ref T15 v15, ref T16 v16);
+        public delegate void QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Entity et, ref T1 v1, ref T2 v2, ref T3 v3, ref T4 v4, ref T5 v5, ref T6 v6, ref T7 v7, ref T8 v8, ref T9 v9, ref T10 v10, ref T11 v11, ref T12 v12, ref T13 v13, ref T14 v14, ref T15 v15, ref T16 v16);
 
         /// <summary>
         /// 
         /// </summary>
-        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> handler, QueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged where T16 : unmanaged
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> handler) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged where T16 : unmanaged
+        {
+            try
+            {
+                Query(handler, _default);
+            }
+            finally
+            {
+                _default.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Query<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(QueryHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> handler, QueryFilter filter) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged where T9 : unmanaged where T10 : unmanaged where T11 : unmanaged where T12 : unmanaged where T13 : unmanaged where T14 : unmanaged where T15 : unmanaged where T16 : unmanaged
         {
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T1>());
             QueryFilter.Set(ref filter.AllMask, ComponentRegistry.GetId<T2>());

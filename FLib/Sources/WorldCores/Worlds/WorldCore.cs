@@ -25,7 +25,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public FixedIndexList<(ComponentTypeOffsetHelper DenseIndexes, int Size)> DynamicComponentSparse;
+        public FixedIndexList<(ComponentSparseList DenseIndexes, int Size)> DynamicComponentSparse;
 
         /// <summary>
         /// 
@@ -118,7 +118,7 @@ namespace FLib.WorldCores
             if (eti.HasDynamicComponent)
             {
                 var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
-                var denseIndexes = sparse.DenseIndexes.Offsets;
+                var denseIndexes = sparse.DenseIndexes.List;
                 for (var i = 0; i < sparse.Size; i++)
                 {
                     var denseIdx = denseIndexes[i];
@@ -156,7 +156,7 @@ namespace FLib.WorldCores
             if (eti.HasDynamicComponent)
             {
                 var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
-                var denseIndexes = sparse.DenseIndexes.Offsets;
+                var denseIndexes = sparse.DenseIndexes.List;
                 for (var i = 0; i < sparse.Size; i++)
                 {
                     var denseIdx = denseIndexes[i];
@@ -278,9 +278,12 @@ namespace FLib.WorldCores
         /// </summary>
         public void RemoveDyn<T>(Entity et)
         {
-            ref var sparse = ref DynamicComponentSparse.GetRef(GetEntityInfo(et).DynamicComponentSparseIdx);
-            var compIdx = sparse.DenseIndexes.GetAndClear(ComponentRegistry.GetId<T>());
+            ref readonly var eti = ref GetEntityInfo(et);
+            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+            var id = ComponentRegistry.GetId<T>();
+            var compIdx = sparse.DenseIndexes.GetAndClear(id);
             DynamicComponent.GetGroup<T>().Free(et, compIdx);
+            ArchetypeGroup[eti.ArchetypeIdx].SetMask(id, false);
         }
 
         /// <summary>
@@ -288,9 +291,12 @@ namespace FLib.WorldCores
         /// </summary>
         public void RemoveDyn(Entity et, Type type)
         {
-            ref var sparse = ref DynamicComponentSparse.GetRef(GetEntityInfo(et).DynamicComponentSparseIdx);
-            var compIdx = sparse.DenseIndexes.GetAndClear(ComponentRegistry.GetId(type));
+            ref readonly var eti = ref GetEntityInfo(et);
+            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+            var id = ComponentRegistry.GetId(type);
+            var compIdx = sparse.DenseIndexes.GetAndClear(id);
             DynamicComponent.GetGroup(type).Free(et, compIdx);
+            ArchetypeGroup[eti.ArchetypeIdx].SetMask(id, false);
         }
 
         /// <summary>
@@ -318,6 +324,8 @@ namespace FLib.WorldCores
         private int DynamicComponentIndex(Entity et, IDynamicComponentGroupable group, IncrementId componentId)
         {
             ref var eti = ref GetEntityInfo(et);
+            ArchetypeGroup[eti.ArchetypeIdx].SetMask(componentId, true);
+
             int compIdx;
             if (eti.HasDynamicComponent)
             {
@@ -331,7 +339,7 @@ namespace FLib.WorldCores
             else
             {
                 compIdx = group.Alloc(et);
-                var sparseIndexes = new ComponentTypeOffsetHelper(componentId, true) { [componentId] = compIdx };
+                var sparseIndexes = new ComponentSparseList(componentId, true) { [componentId] = compIdx };
                 eti.DynamicComponentSparseIdx = DynamicComponentSparse.Add((sparseIndexes, componentId.Raw));
             }
 
@@ -383,7 +391,7 @@ namespace FLib.WorldCores
             {
                 try
                 {
-                    ArchetypeGroup[i].ClearChunks();
+                    ArchetypeGroup[i].Dispose();
                 }
                 catch (Exception e)
                 {
