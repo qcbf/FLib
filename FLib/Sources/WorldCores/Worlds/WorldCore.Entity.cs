@@ -46,17 +46,17 @@ namespace FLib.WorldCores
                 archetype = ArchetypeGroup.Create(hash, archetypeBuilder);
             }
 
-            var et = archetype.CreateEntity(out var chunkEntityIdx);
+            var et = archetype.CreateEntity(out var chunkEntityIndex);
             var chunk = archetype.Chunks;
             if (initMemory)
             {
                 ref readonly var components = ref builder.ComponentTypes;
                 for (var i = 0; i < components.Count; i++)
-                    chunk.ClearMemory(chunkEntityIdx, components[i]);
+                    chunk.ClearMemory(chunkEntityIndex, components[i]);
             }
 
             foreach (var (meta, invoker) in builder.Invokers)
-                invoker(ref *(byte*)chunk.Get(chunkEntityIdx, meta), this, et);
+                invoker(ref *(byte*)chunk.Get(chunkEntityIndex, meta), this, et);
 
             return et;
         }
@@ -69,18 +69,18 @@ namespace FLib.WorldCores
             ref readonly var eti = ref GetEntityInfo(et);
             if (eti.HasDynamicComponent)
             {
-                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
+                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIndex];
                 var denseIndexes = sparse.List;
                 for (var i = 0; i < denseIndexes.Length; i++)
                 {
-                    var denseIdx = denseIndexes[i];
-                    if (denseIdx < 0) continue;
+                    var denseIndex = denseIndexes[i];
+                    if (denseIndex < 0) continue;
                     var type = ComponentRegistry.GetType(new IncrementId(i + 1));
-                    DynamicComponent.GetGroup(type).Free(et, denseIdx);
+                    DynamicComponent.GetGroup(type).Free(et, denseIndex);
                 }
             }
 
-            ArchetypeGroup[eti.ArchetypeIdx].RemoveEntity(eti);
+            ArchetypeGroup[eti.ArchetypeIndex].RemoveEntity(eti);
             EntityInfos.RemoveAt(et.Id);
         }
 
@@ -102,19 +102,19 @@ namespace FLib.WorldCores
             list ??= new List<object>();
             var eti = GetEntityInfo(et);
             var chunk = eti.Chunk;
-            foreach (var meta in ArchetypeGroup[eti.ArchetypeIdx].ComponentTypes)
-                list.Add(chunk.GetObj(eti.ChunkEntityIdx, meta));
+            foreach (var meta in ArchetypeGroup[eti.ArchetypeIndex].ComponentTypes)
+                list.Add(chunk.GetObj(eti.ChunkEntityIndex, meta));
 
             if (eti.HasDynamicComponent)
             {
-                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIdx];
+                var sparse = DynamicComponentSparse[eti.DynamicComponentSparseIndex];
                 var denseIndexes = sparse.List;
                 for (var i = 0; i < denseIndexes.Length; i++)
                 {
-                    var denseIdx = denseIndexes[i];
-                    if (denseIdx < 0) continue;
+                    var denseIndex = denseIndexes[i];
+                    if (denseIndex < 0) continue;
                     var meta = ComponentRegistry.GetInfo(new IncrementId(i + 1)).Meta;
-                    var compIdx = DynamicComponentSparse[denseIdx].Get(meta.Id);
+                    var compIdx = DynamicComponentSparse[denseIndex].Get(meta.Id);
                     var val = DynamicComponent.GetGroup(meta.Type).Components.GetValue(compIdx);
                     list.Add(val);
                 }

@@ -10,33 +10,33 @@ namespace FLib.WorldCores
         public static EntityInfo Empty = default;
         public Chunk Chunk;
         public readonly ushort Version;
-        public readonly ushort ArchetypeIdx;
-        public ushort ChunkEntityIdx;
-        private ushort _dynamicComponentIdx;
+        public readonly ushort ArchetypeIndex;
+        public ushort ChunkEntityIndex;
+        private ushort _dynamicComponentIndex;
 
         public bool IsEmpty => Version == 0;
 
         /// <summary>
         /// 
         /// </summary>
-        public int DynamicComponentSparseIdx
+        public int DynamicComponentSparseIndex
         {
-            readonly get => _dynamicComponentIdx - 1;
-            set => _dynamicComponentIdx = checked((ushort)(value + 1));
+            readonly get => _dynamicComponentIndex - 1;
+            set => _dynamicComponentIndex = checked((ushort)(value + 1));
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public readonly bool HasDynamicComponent => _dynamicComponentIdx != 0;
+        public readonly bool HasDynamicComponent => _dynamicComponentIndex != 0;
 
-        public EntityInfo(ushort version, ushort archetypeIdx, ushort chunkEntityIdx, Chunk chunk)
+        public EntityInfo(ushort version, ushort archetypeIndex, ushort chunkEntityIndex, Chunk chunk)
         {
             Version = version;
-            ArchetypeIdx = archetypeIdx;
-            ChunkEntityIdx = chunkEntityIdx;
+            ArchetypeIndex = archetypeIndex;
+            ChunkEntityIndex = chunkEntityIndex;
             Chunk = chunk;
-            _dynamicComponentIdx = 0;
+            _dynamicComponentIndex = 0;
         }
 
         /// <summary>
@@ -44,6 +44,6 @@ namespace FLib.WorldCores
         /// </summary>
         /// <param name="world"></param>
         /// <returns></returns>
-        public readonly Archetype GetArchetype(WorldCore world) => world.ArchetypeGroup[ArchetypeIdx];
+        public readonly Archetype GetArchetype(WorldCore world) => world.ArchetypeGroup[ArchetypeIndex];
     }
 }

@@ -12,9 +12,9 @@ namespace FLib.WorldCores
         public unsafe ref T GetSimple<T>(Entity et)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            if (eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIdx].TryGet<T>(out var denseIdx))
-                return ref DynamicComponent.GetGroup<T>().Components[denseIdx];
-            return ref *eti.Chunk.Get<T>(eti.ChunkEntityIdx);
+            if (eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIndex].TryGet<T>(out var denseIndex))
+                return ref DynamicComponent.GetGroup<T>().Components[denseIndex];
+            return ref *eti.Chunk.Get<T>(eti.ChunkEntityIndex);
         }
     }
 }

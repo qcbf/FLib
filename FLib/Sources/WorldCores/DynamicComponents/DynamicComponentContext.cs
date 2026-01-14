@@ -5,12 +5,12 @@ namespace FLib.WorldCores
     public readonly struct DynamicComponentContext
     {
         public readonly Entity Entity;
-        public readonly int ComponentIdx;
+        public readonly int ComponentIndex;
 
-        public DynamicComponentContext(Entity entity, int componentIdx)
+        public DynamicComponentContext(Entity entity, int componentIndex)
         {
             Entity = entity;
-            ComponentIdx = componentIdx;
+            ComponentIndex = componentIndex;
         }
     }
 }

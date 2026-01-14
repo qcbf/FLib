@@ -45,10 +45,10 @@ public class TestWorldCore
         world.SetSta(player2, new Team() { Value = 10 });
         var enemy1 = world.CreateEntity<Enemy, Team, Actor>(v2: new Team() { Value = 100 });
 
-        Assert.Equal(world.EntityInfos[player1.Id].ArchetypeIdx, world.EntityInfos[player2.Id].ArchetypeIdx);
+        Assert.Equal(world.EntityInfos[player1.Id].ArchetypeIndex, world.EntityInfos[player2.Id].ArchetypeIndex);
         Assert.False(world.HasSta<Enemy>(player1));
         Assert.False(world.HasSta<Mng<Player>>(enemy1));
-        Assert.NotEqual(world.EntityInfos[player1.Id].ArchetypeIdx, world.EntityInfos[enemy1.Id].ArchetypeIdx);
+        Assert.NotEqual(world.EntityInfos[player1.Id].ArchetypeIndex, world.EntityInfos[enemy1.Id].ArchetypeIndex);
         Assert.ThrowsAny<Exception>(() => world.SetSta(player1, new Enemy()));
         Assert.Equal(5, world.GetSta<Team>(player1).Val.Value);
         Assert.Equal(10, world.GetSta<Team>(player2).Val.Value);

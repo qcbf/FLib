@@ -31,6 +31,11 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
+        public int SharedComponentIndex;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Chunk Previous;
 
         void IObjectPoolActivatable.ObjectPoolActivate()
@@ -49,46 +54,46 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public Entity* GetEntity(int entityIdx)
+        public Entity* GetEntity(int entityIndex)
         {
-            Debug.Assert(entityIdx < Count);
-            return (Entity*)Buffer + entityIdx;
+            Debug.Assert(entityIndex < Count);
+            return (Entity*)Buffer + entityIndex;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public ref T GetRef<T>(ushort entityIdx)
+        public ref T GetRef<T>(ushort entityIndex)
         {
-            return ref *Get<T>(entityIdx);
+            return ref *Get<T>(entityIndex);
         }
 
 #pragma warning disable CS8500
         /// <summary>
         /// 
         /// </summary>
-        public T* Get<T>(ushort entityIdx)
+        public T* Get<T>(ushort entityIndex)
         {
-            Debug.Assert(entityIdx < Count);
+            Debug.Assert(entityIndex < Count);
             Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<T>());
-            return (T*)(Buffer + Sparse.Get<T>()) + entityIdx;
+            return (T*)(Buffer + Sparse.Get<T>()) + entityIndex;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void* Get(ushort entityIdx, in ComponentMeta meta)
+        public void* Get(ushort entityIndex, in ComponentMeta meta)
         {
-            Debug.Assert(entityIdx < Count);
-            return Buffer + Sparse[meta.Id] + meta.Size * entityIdx;
+            Debug.Assert(entityIndex < Count);
+            return Buffer + Sparse[meta.Id] + meta.Size * entityIndex;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public object GetObj(ushort entityIdx, in ComponentMeta meta)
+        public object GetObj(ushort entityIndex, in ComponentMeta meta)
         {
-            var ptr = Get(entityIdx, meta);
+            var ptr = Get(entityIndex, meta);
             object obj;
             if (meta.Type.IsGenericType)
             {
@@ -114,10 +119,10 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public void ClearMemory(ushort entityIdx, in ComponentMeta meta)
+        public void ClearMemory(ushort entityIndex, in ComponentMeta meta)
         {
-            Debug.Assert(entityIdx < Count);
-            Unsafe.InitBlockUnaligned(Buffer + Sparse[meta.Id] + meta.Size * entityIdx, 0, meta.Size);
+            Debug.Assert(entityIndex < Count);
+            Unsafe.InitBlockUnaligned(Buffer + Sparse[meta.Id] + meta.Size * entityIndex, 0, meta.Size);
         }
 
         /// <summary>

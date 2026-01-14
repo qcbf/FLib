@@ -13,7 +13,7 @@ namespace FLib.WorldCores
         /// </summary>
         public ref T GetDyn<T>(Entity et)
         {
-            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIdx;
+            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIndex;
             Debug.Assert(dynIdx >= 0);
             var compIdx = DynamicComponentSparse[dynIdx].Get<T>();
             return ref DynamicComponent.GetGroup<T>().Components[compIdx];
@@ -24,7 +24,7 @@ namespace FLib.WorldCores
         /// </summary>
         public object GetDyn(Entity et, Type type)
         {
-            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIdx;
+            var dynIdx = GetEntityInfo(et).DynamicComponentSparseIndex;
             Debug.Assert(dynIdx >= 0);
             var compIdx = DynamicComponentSparse[dynIdx].Get(type);
             return DynamicComponent.GetGroup(type).Components.GetValue(compIdx);
@@ -57,7 +57,7 @@ namespace FLib.WorldCores
         public void RemoveDyn<T>(Entity et)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIndex);
             var id = ComponentRegistry.GetId<T>();
             var compIdx = sparse.GetAndClear(id);
             DynamicComponent.GetGroup<T>().Free(et, compIdx);
@@ -69,7 +69,7 @@ namespace FLib.WorldCores
         public void RemoveDyn(Entity et, Type type)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+            ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIndex);
             var id = ComponentRegistry.GetId(type);
             var compIdx = sparse.GetAndClear(id);
             DynamicComponent.GetGroup(type).Free(et, compIdx);
@@ -81,7 +81,7 @@ namespace FLib.WorldCores
         public bool HasDyn<T>(Entity et)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIdx].Has<T>();
+            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIndex].Has<T>();
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace FLib.WorldCores
         public bool HasDyn(Entity et, Type componentType)
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIdx].Has(ComponentRegistry.GetId(componentType));
+            return eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIndex].Has(ComponentRegistry.GetId(componentType));
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace FLib.WorldCores
             int compIdx;
             if (eti.HasDynamicComponent)
             {
-                ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIdx);
+                ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIndex);
                 if (!sparse.TryGet(componentId, out compIdx))
                 {
                     sparse.ResizeOnPool(componentId);
@@ -114,7 +114,7 @@ namespace FLib.WorldCores
             {
                 compIdx = group.Alloc(et);
                 var sparseIndexes = new ComponentSparseList(componentId, true) { [componentId] = compIdx };
-                eti.DynamicComponentSparseIdx = DynamicComponentSparse.Add(sparseIndexes);
+                eti.DynamicComponentSparseIndex = DynamicComponentSparse.Add(sparseIndexes);
             }
 
             return compIdx;

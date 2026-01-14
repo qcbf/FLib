@@ -17,12 +17,12 @@ namespace FLib.WorldCores
         /// <summary>
         /// 释放动态组件
         /// </summary>
-        void Free(in Entity et, int idx);
+        void Free(in Entity et, int index);
 
         // /// <summary>
         // /// 
         // /// </summary>
-        // bool Has(Entity et, int idx);
+        // bool Has(Entity et, int index);
 
         /// <summary>
         /// 预分配动态组件

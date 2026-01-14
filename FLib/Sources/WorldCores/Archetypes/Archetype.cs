@@ -35,7 +35,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public readonly ushort Idx;
+        public readonly ushort Index;
 
         /// <summary>
         /// 
@@ -48,10 +48,10 @@ namespace FLib.WorldCores
         public Chunk Chunks { get; private set; }
 
 
-        public Archetype(WorldCore world, in ArchetypeBuilder builder, ushort idx)
+        public Archetype(WorldCore world, in ArchetypeBuilder builder, ushort index)
         {
             World = world;
-            Idx = idx;
+            Index = index;
             MaxComponentId = builder.MaxComponentId;
             ComponentTypes = builder.ComponentTypes.ToArray();
             ComponentMask = new ulong[BitArrayOperator.GetBitsLength(MaxComponentId.Raw)];
@@ -70,7 +70,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public Entity CreateEntity(out ushort chunkEntityIdx)
+        public Entity CreateEntity(out ushort chunkEntityIndex)
         {
             if (Chunks == null || Chunks.Count >= EntitiesPerChunk)
             {
@@ -80,10 +80,10 @@ namespace FLib.WorldCores
                 Chunks = newChunk;
             }
 
-            chunkEntityIdx = Chunks.Count++;
-            var eti = new EntityInfo(World.GenVersion(), Idx, chunkEntityIdx, Chunks);
+            chunkEntityIndex = Chunks.Count++;
+            var eti = new EntityInfo(World.GenVersion(), Index, chunkEntityIndex, Chunks);
             var id = checked((ushort)World.EntityInfos.Add(eti));
-            return *Chunks.GetEntity(eti.ChunkEntityIdx) = new Entity(id, eti.Version);
+            return *Chunks.GetEntity(eti.ChunkEntityIndex) = new Entity(id, eti.Version);
         }
 
         /// <summary>
@@ -92,27 +92,27 @@ namespace FLib.WorldCores
         public void RemoveEntity(in EntityInfo eti)
         {
             var etChunk = eti.Chunk;
-            var et = *etChunk.GetEntity(eti.ChunkEntityIdx);
+            var et = *etChunk.GetEntity(eti.ChunkEntityIndex);
             var backEt = *Chunks.GetEntity(Chunks.Count - 1);
             ref var backEti = ref World.EntityInfos.GetRef(backEt.Id);
 
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
-                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)etChunk.Get(eti.ChunkEntityIdx, meta), World, et);
+                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)etChunk.Get(eti.ChunkEntityIndex, meta), World, et);
             }
 
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
-                Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIdx, meta),
-                    etChunk.Get(eti.ChunkEntityIdx, meta),
+                Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIndex, meta),
+                    etChunk.Get(eti.ChunkEntityIndex, meta),
                     ushort.MaxValue, meta.Size);
             }
 
             backEti.Chunk = etChunk;
-            backEti.ChunkEntityIdx = eti.ChunkEntityIdx;
-            *etChunk.GetEntity(eti.ChunkEntityIdx) = backEt;
+            backEti.ChunkEntityIndex = eti.ChunkEntityIndex;
+            *etChunk.GetEntity(eti.ChunkEntityIndex) = backEt;
             if (--Chunks.Count <= 0)
             {
                 var temp = Chunks;

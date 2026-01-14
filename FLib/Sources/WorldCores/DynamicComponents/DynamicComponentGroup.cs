@@ -18,7 +18,7 @@ namespace FLib.WorldCores
         Array IDynamicComponentGroupable.Components => Components;
 
 
-        public ref T this[in DynamicComponentContext ctx] => ref Components[ctx.ComponentIdx];
+        public ref T this[in DynamicComponentContext ctx] => ref Components[ctx.ComponentIndex];
 
         // /// <summary>
         // /// 
@@ -44,28 +44,28 @@ namespace FLib.WorldCores
         /// </summary>
         public int Alloc(in Entity et)
         {
-            if (!Frees.TryPop(out var idx))
+            if (!Frees.TryPop(out var index))
             {
                 if (Count >= Components.Length)
                     EnsureCapacity(MathEx.GetNextPowerOfTwo(Count + 1));
-                idx = Count;
+                index = Count;
             }
 
             ++Count;
             ref var first = ref MemoryMarshal.GetArrayDataReference(Components);
-            first = ref Unsafe.Add(ref first, idx);
+            first = ref Unsafe.Add(ref first, index);
             ComponentRegistry.GetInfo<T>().ComponentAwake?.Invoke(ref Unsafe.As<T, byte>(ref first), World, et);
-            return idx;
+            return index;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void Free(in Entity et, int idx)
+        public void Free(in Entity et, int index)
         {
-            ComponentRegistry.GetInfo<T>().ComponentDestroy?.Invoke(ref Unsafe.As<T, byte>(ref Components[idx]), World, et);
-            Components[idx] = default;
-            Frees.Push(idx);
+            ComponentRegistry.GetInfo<T>().ComponentDestroy?.Invoke(ref Unsafe.As<T, byte>(ref Components[index]), World, et);
+            Components[index] = default;
+            Frees.Push(index);
             --Count;
         }
     }

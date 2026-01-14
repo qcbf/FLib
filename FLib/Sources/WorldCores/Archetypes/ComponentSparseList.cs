@@ -52,25 +52,25 @@ namespace FLib.WorldCores
             List = list;
         }
 
-        public bool TryGet(Type type, out int idx)
+        public bool TryGet(Type type, out int index)
         {
-            return TryGet(ComponentRegistry.GetId(type), out idx);
+            return TryGet(ComponentRegistry.GetId(type), out index);
         }
 
-        public bool TryGet<T>(out int idx)
+        public bool TryGet<T>(out int index)
         {
-            return TryGet(ComponentRegistry.GetId<T>(), out idx);
+            return TryGet(ComponentRegistry.GetId<T>(), out index);
         }
 
-        public bool TryGet(IncrementId componentId, out int idx)
+        public bool TryGet(IncrementId componentId, out int index)
         {
             if (List.Length < componentId)
             {
-                idx = -1;
+                index = -1;
                 return false;
             }
 
-            return (idx = List[componentId]) >= 0;
+            return (index = List[componentId]) >= 0;
         }
 
         public int Get(Type type) => Get(ComponentRegistry.GetId(type));
