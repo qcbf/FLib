@@ -38,5 +38,12 @@ namespace FLib.WorldCores
             Chunk = chunk;
             _dynamicComponentIdx = 0;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="world"></param>
+        /// <returns></returns>
+        public readonly Archetype GetArchetype(WorldCore world) => world.ArchetypeGroup[ArchetypeIdx];
     }
 }

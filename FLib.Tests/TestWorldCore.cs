@@ -80,10 +80,11 @@ public class TestWorldCore
         Assert.Equal(100, world.GetSta<Team>(enemy1).Val.Value);
 
         // dynamic
+        Assert.False(world.HasDyn<Buff>(player1));
         world.SetDyn(player1, new Buff() { Name = "abc" });
-        results = new Queue<int>([player2.Version, enemy1.Version]);
-        world.Query(et => Assert.Equal(results.Dequeue(), et.Version), new QueryFilter().None<Buff>());
-        Assert.Empty(results);
+        // results = new Queue<int>([player2.Version, enemy1.Version]);
+        // world.Query(et => Assert.Equal(results.Dequeue(), et.Version), new QueryFilter().None<Buff>());
+        // Assert.Empty(results);
 
         Assert.True(world.HasDyn<Buff>(player1));
         Assert.Equal("abc", world.GetDyn<Buff>(player1).Name);

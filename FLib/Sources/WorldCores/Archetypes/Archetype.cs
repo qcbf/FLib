@@ -15,7 +15,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public ulong[] ComponentMask;
+        public readonly ulong[] ComponentMask;
 
         /// <summary>
         /// 
@@ -54,7 +54,7 @@ namespace FLib.WorldCores
             Idx = idx;
             MaxComponentId = builder.MaxComponentId;
             ComponentTypes = builder.ComponentTypes.ToArray();
-            ComponentMask = ArrayPool<ulong>.Shared.Rent(BitArrayOperator.GetBitsLength(MaxComponentId.Raw));
+            ComponentMask = new ulong[BitArrayOperator.GetBitsLength(MaxComponentId.Raw)];
             EntitiesPerChunk = (int)(GlobalSetting.ChunkAllocator.ChunkSize / (builder.ComponentsSize + sizeof(Entity)));
             Sparse = new ComponentSparseList(MaxComponentId, false);
             var offset = EntitiesPerChunk * sizeof(Entity);
@@ -134,25 +134,6 @@ namespace FLib.WorldCores
                 chunk = chunk.Previous;
                 GlobalObjectPool<Chunk>.Release(temp);
             }
-
-            ArrayPool<ulong>.Shared.Return(ComponentMask);
-            ComponentMask = null;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void SetMask(IncrementId componentId, bool value)
-        {
-            if (ComponentMask.Length < BitArrayOperator.GetBitsLength(componentId.Raw))
-            {
-                var newMask = ArrayPool<ulong>.Shared.Rent(BitArrayOperator.GetBitsLength(componentId.Raw));
-                ComponentMask.CopyTo(newMask, 0);
-                ArrayPool<ulong>.Shared.Return(ComponentMask);
-                ComponentMask = newMask;
-            }
-
-            BitArrayOperator.SetBit(ComponentMask, componentId, value);
         }
     }
 }

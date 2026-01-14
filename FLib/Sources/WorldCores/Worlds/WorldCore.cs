@@ -283,7 +283,6 @@ namespace FLib.WorldCores
             var id = ComponentRegistry.GetId<T>();
             var compIdx = sparse.DenseIndexes.GetAndClear(id);
             DynamicComponent.GetGroup<T>().Free(et, compIdx);
-            ArchetypeGroup[eti.ArchetypeIdx].SetMask(id, false);
         }
 
         /// <summary>
@@ -296,7 +295,6 @@ namespace FLib.WorldCores
             var id = ComponentRegistry.GetId(type);
             var compIdx = sparse.DenseIndexes.GetAndClear(id);
             DynamicComponent.GetGroup(type).Free(et, compIdx);
-            ArchetypeGroup[eti.ArchetypeIdx].SetMask(id, false);
         }
 
         /// <summary>
@@ -324,8 +322,6 @@ namespace FLib.WorldCores
         private int DynamicComponentIndex(Entity et, IDynamicComponentGroupable group, IncrementId componentId)
         {
             ref var eti = ref GetEntityInfo(et);
-            ArchetypeGroup[eti.ArchetypeIdx].SetMask(componentId, true);
-
             int compIdx;
             if (eti.HasDynamicComponent)
             {
