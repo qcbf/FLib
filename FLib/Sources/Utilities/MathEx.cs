@@ -40,6 +40,15 @@ namespace FLib
         }
 
         /// <summary>
+        /// 得到N字节对齐的新大小
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int AlignUp(int size, int alignment)
+        {
+            return (size + (alignment - 1)) & ~(alignment - 1);
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

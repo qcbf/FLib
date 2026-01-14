@@ -14,6 +14,8 @@ public struct Player
 public struct Team
 {
     public byte Value;
+    public byte TestAlign1;
+    public byte TestAlign2;
     public override string ToString() => Value.ToString();
 }
 
@@ -76,7 +78,7 @@ public class TestWorldCore
         // managed
         player1 = world.CreateEntity<Mng<Player>, Team, Actor>(v2: new Team() { Value = 6 });
         Assert.Equal(6, world.GetSta<Team>(player1).Val.Value);
-        Assert.Equal(10, world.GetSta<Team>(player2).Val.Value);
+        Assert.Equal(10, world.GetSimple<Team>(player2).Value);
         Assert.Equal(100, world.GetSta<Team>(enemy1).Val.Value);
 
         // dynamic

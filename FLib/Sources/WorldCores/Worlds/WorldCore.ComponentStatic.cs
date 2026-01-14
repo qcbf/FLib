@@ -46,6 +46,13 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
+        public void SetShared<T>(Entity et, in T val) where T : unmanaged
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool HasSta<T1>(Entity et) where T1 : unmanaged
         {
             return BitArrayOperator.GetBit(ArchetypeGroup[GetEntityInfo(et).ArchetypeIndex].ComponentMask, ComponentRegistry.GetMeta<T1>().Id);

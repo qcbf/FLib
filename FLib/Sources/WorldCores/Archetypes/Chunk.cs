@@ -31,12 +31,17 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public int SharedComponentIndex;
+        public Chunk Previous;
 
         /// <summary>
         /// 
         /// </summary>
-        public Chunk Previous;
+        public int[] SharedComponentIndexes;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int SharedComponentHash;
 
         void IObjectPoolActivatable.ObjectPoolActivate()
         {

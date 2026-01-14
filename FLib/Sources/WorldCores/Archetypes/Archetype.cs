@@ -2,6 +2,8 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace FLib.WorldCores
 {
@@ -57,13 +59,13 @@ namespace FLib.WorldCores
             ComponentMask = new ulong[BitArrayOperator.GetBitsLength(MaxComponentId.Raw)];
             EntitiesPerChunk = (int)(GlobalSetting.ChunkAllocator.ChunkSize / (builder.ComponentsSize + sizeof(Entity)));
             Sparse = new ComponentSparseList(MaxComponentId, false);
-            var offset = EntitiesPerChunk * sizeof(Entity);
+            var offset = MathEx.AlignUp(EntitiesPerChunk * sizeof(Entity), GlobalSetting.ComponentAlign);
             for (ushort i = 0; i < ComponentTypes.Length; i++)
             {
                 ref readonly var meta = ref ComponentTypes[i];
                 Sparse[meta.Id] = offset;
                 BitArrayOperator.SetBit(ComponentMask, meta.Id, true);
-                offset += meta.Size * EntitiesPerChunk;
+                offset += MathEx.AlignUp(meta.Size * EntitiesPerChunk, GlobalSetting.ComponentAlign);
             }
         }
 
@@ -91,28 +93,54 @@ namespace FLib.WorldCores
         /// </summary>
         public void RemoveEntity(in EntityInfo eti)
         {
-            var etChunk = eti.Chunk;
-            var et = *etChunk.GetEntity(eti.ChunkEntityIndex);
+            var chunk = eti.Chunk;
+            // if (--chunk.Count <= 0)
+            // {
+            //     SharedChunks.Remove(chunk.SharedComponentHash);
+            //     GlobalObjectPool<Chunk>.Release(chunk);
+            //     return;
+            // }
+            //
+            // if (eti.ChunkEntityIndex == chunk.Count)
+            //     return;
+            //
+            var et = *chunk.GetEntity(eti.ChunkEntityIndex);
+            // for (var i = 0; i < ComponentTypes.Length; i++)
+            // {
+            //     var meta = ComponentTypes[i];
+            //     ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)chunk.Get(eti.ChunkEntityIndex, meta), World, et);
+            // }
+            //
+            // var srcIndex = (ushort)(chunk.Count - 1);
+            // var dstIndex = eti.ChunkEntityIndex;
+            // for (var i = 0; i < ComponentTypes.Length; i++)
+            // {
+            //     var meta = ComponentTypes[i];
+            //     Unsafe.CopyBlock(chunk.Get(dstIndex, meta), chunk.Get(srcIndex, meta), meta.Size);
+            // }
+            //
+            // *chunk.GetEntity(dstIndex) = *chunk.GetEntity(srcIndex);
+
             var backEt = *Chunks.GetEntity(Chunks.Count - 1);
             ref var backEti = ref World.EntityInfos.GetRef(backEt.Id);
 
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
-                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)etChunk.Get(eti.ChunkEntityIndex, meta), World, et);
+                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)chunk.Get(eti.ChunkEntityIndex, meta), World, et);
             }
 
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
                 Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIndex, meta),
-                    etChunk.Get(eti.ChunkEntityIndex, meta),
+                    chunk.Get(eti.ChunkEntityIndex, meta),
                     ushort.MaxValue, meta.Size);
             }
 
-            backEti.Chunk = etChunk;
+            backEti.Chunk = chunk;
             backEti.ChunkEntityIndex = eti.ChunkEntityIndex;
-            *etChunk.GetEntity(eti.ChunkEntityIndex) = backEt;
+            *chunk.GetEntity(eti.ChunkEntityIndex) = backEt;
             if (--Chunks.Count <= 0)
             {
                 var temp = Chunks;
@@ -134,6 +162,18 @@ namespace FLib.WorldCores
                 chunk = chunk.Previous;
                 GlobalObjectPool<Chunk>.Release(temp);
             }
+            // foreach (var kv in SharedChunks)
+            // {
+            //     var chunk = kv.Value;
+            //     while (chunk != null)
+            //     {
+            //         var temp = chunk;
+            //         chunk = chunk.Previous;
+            //         GlobalObjectPool<Chunk>.Release(temp);
+            //     }
+            // }
+            //
+            // SharedChunks.Clear();
         }
     }
 }

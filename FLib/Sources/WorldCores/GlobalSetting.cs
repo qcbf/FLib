@@ -10,6 +10,11 @@ namespace FLib.WorldCores
     public static class GlobalSetting
     {
         /// <summary>
+        /// 对齐大小
+        /// </summary>
+        public static int ComponentAlign = 16;
+
+        /// <summary>
         /// 组件每次扩容的大小
         /// </summary>
         public static int CapacityExpandSize = 32;
