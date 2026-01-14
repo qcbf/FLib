@@ -58,17 +58,19 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public ref T GetRef<T>(ushort entityIdx) where T : unmanaged
+        public ref T GetRef<T>(ushort entityIdx)
         {
             return ref *Get<T>(entityIdx);
         }
 
+#pragma warning disable CS8500
         /// <summary>
         /// 
         /// </summary>
-        public T* Get<T>(ushort entityIdx) where T : unmanaged
+        public T* Get<T>(ushort entityIdx)
         {
             Debug.Assert(entityIdx < Count);
+            Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<T>());
             return (T*)(Buffer + Sparse.Get<T>()) + entityIdx;
         }
 
