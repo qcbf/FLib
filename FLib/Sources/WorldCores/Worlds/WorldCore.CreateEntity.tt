@@ -15,7 +15,7 @@ namespace FLib.WorldCores
         var genericWheres = string.Join(" ", Enumerable.Range(1, i).Select(n => $"where T{n} : unmanaged"));
         var methodParams = string.Join(", ", Enumerable.Range(1, i).Select(n => $"in T{n} v{n} = default"));
         var builderAdds = string.Join("\n                ", Enumerable.Range(1, i).Select(n => $"builder.Add<T{n}>();"));
-        var setComponents = string.Join("\n            ", Enumerable.Range(1, i).Select(n => $"*chunk.Get<T{n}>(chunkEntityIndex) = v{n};"));
+        var setComponents = string.Join("\n            ", Enumerable.Range(1, i).Select(n => $"*chunk.Get<T{n}>(eti.IndexInChunk) = v{n};"));
         var setBits = string.Join("\n            ", Enumerable.Range(1, i)
             .Select(n => $"BitArrayOperator.SetBit(ComponentRegistry.ComponentTypeMaskBuffer, ComponentRegistry.GetId<T{n}>(), true);"));
 #>
@@ -33,11 +33,11 @@ namespace FLib.WorldCores
                 <#= builderAdds #>
                 archetype = ArchetypeGroup.Create(hash, builder);
             }
-            var et = archetype.CreateEntity(out var chunkEntityIndex);
-            var chunk = archetype.Chunks;
+            var et = archetype.CreateEntity(out var eti);
+            var chunk = eti.Chunk;
             <#= setComponents #>
             <#= string.Join("\n            ", Enumerable.Range(1, i)
-                    .Select(n => $"ComponentGenericMap<T{n}>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T{n}>(chunkEntityIndex), this, et);")) #>
+                    .Select(n => $"ComponentGenericMap<T{n}>.Info.ComponentAwake?.Invoke(ref *(byte*)chunk.Get<T{n}>(eti.IndexInChunk), this, et);")) #>
             return et;
         }
 <#

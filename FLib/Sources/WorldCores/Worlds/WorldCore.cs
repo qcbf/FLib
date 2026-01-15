@@ -20,7 +20,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public readonly DynamicComponentGroupManager DynamicComponent;
+        public readonly SoaComponentGroupManager Soa;
 
         /// <summary>
         /// 
@@ -50,7 +50,7 @@ namespace FLib.WorldCores
         public WorldCore(int entityCapacity = 1024)
         {
             ArchetypeGroup = new ArchetypeGroup(this);
-            DynamicComponent = new DynamicComponentGroupManager(this);
+            Soa = new SoaComponentGroupManager(this);
             EntityInfos = new FixedIndexList<EntityInfo>(entityCapacity);
             DynamicComponentSparse = new(entityCapacity >> 1);
         }

@@ -46,17 +46,18 @@ namespace FLib.WorldCores
                 archetype = ArchetypeGroup.Create(hash, archetypeBuilder);
             }
 
-            var et = archetype.CreateEntity(out var chunkEntityIndex);
-            var chunk = archetype.Chunks;
+            var et = archetype.CreateEntity(out var entityInfo);
+            var chunk = entityInfo.Chunk;
+            var indexInChunk = entityInfo.IndexInChunk;
             if (initMemory)
             {
                 ref readonly var components = ref builder.ComponentTypes;
                 for (var i = 0; i < components.Count; i++)
-                    chunk.ClearMemory(chunkEntityIndex, components[i]);
+                    chunk.ClearMemory(indexInChunk, components[i]);
             }
 
             foreach (var (meta, invoker) in builder.Invokers)
-                invoker(ref *(byte*)chunk.Get(chunkEntityIndex, meta), this, et);
+                invoker(ref *(byte*)chunk.Get(indexInChunk, meta), this, et);
 
             return et;
         }
@@ -76,7 +77,7 @@ namespace FLib.WorldCores
                     var denseIndex = denseIndexes[i];
                     if (denseIndex < 0) continue;
                     var type = ComponentRegistry.GetType(new IncrementId(i + 1));
-                    DynamicComponent.GetGroup(type).Free(et, denseIndex);
+                    Soa.GetGroup(type).Free(et, denseIndex);
                 }
             }
 
@@ -103,7 +104,7 @@ namespace FLib.WorldCores
             var eti = GetEntityInfo(et);
             var chunk = eti.Chunk;
             foreach (var meta in ArchetypeGroup[eti.ArchetypeIndex].ComponentTypes)
-                list.Add(chunk.GetObj(eti.ChunkEntityIndex, meta));
+                list.Add(chunk.GetObj(eti.IndexInChunk, meta));
 
             if (eti.HasDynamicComponent)
             {
@@ -115,7 +116,7 @@ namespace FLib.WorldCores
                     if (denseIndex < 0) continue;
                     var meta = ComponentRegistry.GetInfo(new IncrementId(i + 1)).Meta;
                     var compIdx = DynamicComponentSparse[denseIndex].Get(meta.Id);
-                    var val = DynamicComponent.GetGroup(meta.Type).Components.GetValue(compIdx);
+                    var val = Soa.GetGroup(meta.Type).Components.GetValue(compIdx);
                     list.Add(val);
                 }
             }

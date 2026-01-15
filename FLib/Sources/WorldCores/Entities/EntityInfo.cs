@@ -11,7 +11,7 @@ namespace FLib.WorldCores
         public Chunk Chunk;
         public readonly ushort Version;
         public readonly ushort ArchetypeIndex;
-        public ushort ChunkEntityIndex;
+        public ushort IndexInChunk;
         private ushort _dynamicComponentIndex;
 
         public bool IsEmpty => Version == 0;
@@ -30,11 +30,11 @@ namespace FLib.WorldCores
         /// </summary>
         public readonly bool HasDynamicComponent => _dynamicComponentIndex != 0;
 
-        public EntityInfo(ushort version, ushort archetypeIndex, ushort chunkEntityIndex, Chunk chunk)
+        public EntityInfo(ushort version, ushort archetypeIndex, ushort indexInChunk, Chunk chunk)
         {
             Version = version;
             ArchetypeIndex = archetypeIndex;
-            ChunkEntityIndex = chunkEntityIndex;
+            IndexInChunk = indexInChunk;
             Chunk = chunk;
             _dynamicComponentIndex = 0;
         }

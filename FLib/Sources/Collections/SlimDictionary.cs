@@ -247,12 +247,12 @@ namespace FLib
         /// <summary>
         /// 
         /// </summary>
-        public bool TryAddCapacity(int addCapacity) => TrySetCapacity(Count + addCapacity);
+        public void TryAddCapacity(int addCapacity) => EnsureCapacity(Count + addCapacity);
 
         /// <summary>
         ///
         /// </summary>
-        public bool TrySetCapacity(int capacity)
+        public void EnsureCapacity(int capacity)
         {
             if (mEntries.Length < capacity)
             {
@@ -263,11 +263,7 @@ namespace FLib
                 {
                     GetOrAddValueRef(temp[i].Key) = temp[i].Value;
                 }
-
-                return true;
             }
-
-            return false;
         }
 
         public bool ContainsKey(in TKey key)

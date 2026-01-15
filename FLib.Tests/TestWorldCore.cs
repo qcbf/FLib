@@ -31,7 +31,6 @@ public struct Enemy
 
 public struct Buff
 {
-    public DynamicComponentContext DynamicComponentContext { get; set; }
     public string Name;
 }
 
@@ -98,11 +97,11 @@ public class TestWorldCore
         Assert.Equal("aaa", world.GetDyn<Buff>(player1).Name);
         world.RemoveDyn<Buff>(player1);
         Assert.False(world.HasDyn<Buff>(player1));
-        Assert.Equal(0, world.DynamicComponent.GetGroup<Buff>().Count);
+        Assert.Equal(0, world.Soa.GetGroup<Buff>().Count);
         world.SetDyn(player1, new Buff() { Name = "abc2" });
-        Assert.Equal(1, world.DynamicComponent.GetGroup<Buff>().Count);
+        Assert.Equal(1, world.Soa.GetGroup<Buff>().Count);
         world.RemoveEntity(player1);
-        Assert.Equal(0, world.DynamicComponent.GetGroup<Buff>().Count);
+        Assert.Equal(0, world.Soa.GetGroup<Buff>().Count);
 
         // dispose
         world.Dispose();

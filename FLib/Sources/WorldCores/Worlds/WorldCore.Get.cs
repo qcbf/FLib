@@ -15,7 +15,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)));
         }
 
@@ -27,7 +27,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)));
         }
 
@@ -39,7 +39,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)));
         }
 
@@ -51,7 +51,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)));
         }
 
@@ -63,7 +63,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)));
         }
 
@@ -75,7 +75,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)));
         }
 
@@ -87,7 +87,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)));
         }
 
@@ -99,7 +99,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)));
         }
 
@@ -111,7 +111,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)));
         }
 
@@ -123,7 +123,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)));
         }
 
@@ -135,7 +135,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)), new Ref<T12>(chunk.Get<T12>(idx)));
         }
 
@@ -147,7 +147,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)), new Ref<T12>(chunk.Get<T12>(idx)), new Ref<T13>(chunk.Get<T13>(idx)));
         }
 
@@ -159,7 +159,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)), new Ref<T12>(chunk.Get<T12>(idx)), new Ref<T13>(chunk.Get<T13>(idx)), new Ref<T14>(chunk.Get<T14>(idx)));
         }
 
@@ -171,7 +171,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)), new Ref<T12>(chunk.Get<T12>(idx)), new Ref<T13>(chunk.Get<T13>(idx)), new Ref<T14>(chunk.Get<T14>(idx)), new Ref<T15>(chunk.Get<T15>(idx)));
         }
 
@@ -183,7 +183,7 @@ namespace FLib.WorldCores
             ref readonly var eti = ref EntityInfos.GetRef(et.Id);
             Debug.Assert(eti.Version == et.Version, "version error");
             var chunk = eti.Chunk;
-            var idx = eti.ChunkEntityIndex;
+            var idx = eti.IndexInChunk;
             return new Components<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(new Ref<T1>(chunk.Get<T1>(idx)), new Ref<T2>(chunk.Get<T2>(idx)), new Ref<T3>(chunk.Get<T3>(idx)), new Ref<T4>(chunk.Get<T4>(idx)), new Ref<T5>(chunk.Get<T5>(idx)), new Ref<T6>(chunk.Get<T6>(idx)), new Ref<T7>(chunk.Get<T7>(idx)), new Ref<T8>(chunk.Get<T8>(idx)), new Ref<T9>(chunk.Get<T9>(idx)), new Ref<T10>(chunk.Get<T10>(idx)), new Ref<T11>(chunk.Get<T11>(idx)), new Ref<T12>(chunk.Get<T12>(idx)), new Ref<T13>(chunk.Get<T13>(idx)), new Ref<T14>(chunk.Get<T14>(idx)), new Ref<T15>(chunk.Get<T15>(idx)), new Ref<T16>(chunk.Get<T16>(idx)));
         }
 

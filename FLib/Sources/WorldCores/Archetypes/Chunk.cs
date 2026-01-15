@@ -36,12 +36,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public int[] SharedComponentIndexes;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int SharedComponentHash;
+        public int SharedComponentsKey;
 
         void IObjectPoolActivatable.ObjectPoolActivate()
         {
@@ -106,7 +101,7 @@ namespace FLib.WorldCores
                 var gch = GCHandle.Alloc(obj, GCHandleType.Pinned);
                 try
                 {
-                    System.Buffer.MemoryCopy(ptr, (void*)gch.AddrOfPinnedObject(), meta.Size, meta.Size);
+                    Unsafe.CopyBlockUnaligned((void*)gch.AddrOfPinnedObject(), ptr, meta.Size);
                 }
                 finally
                 {
@@ -127,7 +122,7 @@ namespace FLib.WorldCores
         public void ClearMemory(ushort entityIndex, in ComponentMeta meta)
         {
             Debug.Assert(entityIndex < Count);
-            Unsafe.InitBlockUnaligned(Buffer + Sparse[meta.Id] + meta.Size * entityIndex, 0, meta.Size);
+            Unsafe.InitBlock(Buffer + Sparse[meta.Id] + meta.Size * entityIndex, 0, meta.Size);
         }
 
         /// <summary>

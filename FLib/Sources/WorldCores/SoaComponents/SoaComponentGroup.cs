@@ -8,17 +8,14 @@ using System.Runtime.InteropServices;
 
 namespace FLib.WorldCores
 {
-    public class DynamicComponentGroup<T> : IDynamicComponentGroupable
+    public class SoaComponentGroup<T> : ISoaComponentGroupable
     {
         public T[] Components = Array.Empty<T>();
         public Stack<int> Frees = new();
         public int Count;
 
         public WorldCore World { get; set; }
-        Array IDynamicComponentGroupable.Components => Components;
-
-
-        public ref T this[in DynamicComponentContext ctx] => ref Components[ctx.ComponentIndex];
+        Array ISoaComponentGroupable.Components => Components;
 
         // /// <summary>
         // /// 
@@ -32,7 +29,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public void EnsureCapacity(int capacity)
+        public virtual void EnsureCapacity(int capacity)
         {
             if (Components.Length >= capacity) return;
             Array.Resize(ref Components, capacity);
@@ -42,7 +39,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public int Alloc(in Entity et)
+        public virtual int Alloc(in Entity et)
         {
             if (!Frees.TryPop(out var index))
             {
@@ -61,11 +58,11 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public void Free(in Entity et, int index)
+        public virtual void Free(in Entity et, int key)
         {
-            ComponentRegistry.GetInfo<T>().ComponentDestroy?.Invoke(ref Unsafe.As<T, byte>(ref Components[index]), World, et);
-            Components[index] = default;
-            Frees.Push(index);
+            ComponentRegistry.GetInfo<T>().ComponentDestroy?.Invoke(ref Unsafe.As<T, byte>(ref Components[key]), World, et);
+            Components[key] = default;
+            Frees.Push(key);
             --Count;
         }
     }

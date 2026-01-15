@@ -7,12 +7,12 @@ namespace FLib.WorldCores
     /// <summary>
     /// 动态组件组 管理器
     /// </summary>
-    public class DynamicComponentGroupManager
+    public class SoaComponentGroupManager
     {
         public WorldCore World;
-        public IDynamicComponentGroupable[] Groups = Array.Empty<IDynamicComponentGroupable>();
+        public ISoaComponentGroupable[] Groups = Array.Empty<ISoaComponentGroupable>();
 
-        public DynamicComponentGroupManager(WorldCore world)
+        public SoaComponentGroupManager(WorldCore world)
         {
             World = world;
         }
@@ -22,12 +22,12 @@ namespace FLib.WorldCores
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public DynamicComponentGroup<T> GetGroup<T>()
+        public SoaComponentGroup<T> GetGroup<T>()
         {
             var id = ComponentRegistry.GetId<T>();
             if (id >= Groups.Length)
-                Groups = new IDynamicComponentGroupable[id + 1];
-            return (DynamicComponentGroup<T>)(Groups[id] ??= new DynamicComponentGroup<T>() { World = World });
+                Groups = new ISoaComponentGroupable[id + 1];
+            return (SoaComponentGroup<T>)(Groups[id] ??= new SoaComponentGroup<T>() { World = World });
         }
 
         /// <summary>
@@ -35,15 +35,15 @@ namespace FLib.WorldCores
         /// </summary>
         /// <param name="componentType"></param>
         /// <returns></returns>
-        public IDynamicComponentGroupable GetGroup(Type componentType)
+        public ISoaComponentGroupable GetGroup(Type componentType)
         {
             var id = ComponentRegistry.GetId(componentType);
             if (id >= Groups.Length)
-                Groups = new IDynamicComponentGroupable[id + 1];
+                Groups = new ISoaComponentGroupable[id + 1];
             ref var group = ref Groups[id];
             if (group == null)
             {
-                group = (IDynamicComponentGroupable)TypeAssistant.New(typeof(DynamicComponentGroup<>).MakeGenericType(componentType));
+                group = (ISoaComponentGroupable)TypeAssistant.New(typeof(SoaComponentGroup<>).MakeGenericType(componentType));
                 group.World = World;
             }
 

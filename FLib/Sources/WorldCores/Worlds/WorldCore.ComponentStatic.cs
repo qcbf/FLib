@@ -14,7 +14,7 @@ namespace FLib.WorldCores
         public unsafe Ref<T1> GetSta<T1>(Entity et) where T1 : unmanaged
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return new Ref<T1>(eti.Chunk.Get<T1>(eti.ChunkEntityIndex));
+            return new Ref<T1>(eti.Chunk.Get<T1>(eti.IndexInChunk));
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace FLib.WorldCores
         public ref T1 GetStaRef<T1>(Entity et) where T1 : unmanaged
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            return ref eti.Chunk.GetRef<T1>(eti.ChunkEntityIndex);
+            return ref eti.Chunk.GetRef<T1>(eti.IndexInChunk);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace FLib.WorldCores
         public void SetSta<T1>(Entity et, in T1 val) where T1 : unmanaged
         {
             ref readonly var eti = ref GetEntityInfo(et);
-            eti.Chunk.GetRef<T1>(eti.ChunkEntityIndex) = val;
+            eti.Chunk.GetRef<T1>(eti.IndexInChunk) = val;
         }
 
         /// <summary>

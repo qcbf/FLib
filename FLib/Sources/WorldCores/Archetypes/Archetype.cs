@@ -44,10 +44,12 @@ namespace FLib.WorldCores
         /// </summary>
         public readonly IncrementId MaxComponentId;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Chunk Chunks { get; private set; }
+        // /// <summary>
+        // /// 
+        // /// </summary>
+        // public Chunk Chunks { get; private set; }
+
+        public readonly Dictionary<int, Chunk> SharedChunks = new();
 
 
         public Archetype(WorldCore world, in ArchetypeBuilder builder, ushort index)
@@ -63,29 +65,32 @@ namespace FLib.WorldCores
             for (ushort i = 0; i < ComponentTypes.Length; i++)
             {
                 ref readonly var meta = ref ComponentTypes[i];
-                Sparse[meta.Id] = offset;
-                BitArrayOperator.SetBit(ComponentMask, meta.Id, true);
-                offset += MathEx.AlignUp(meta.Size * EntitiesPerChunk, GlobalSetting.ComponentAlign);
+                if (!typeof(ISharedComponent).IsAssignableFrom(meta.Type))
+                {
+                    Sparse[meta.Id] = offset;
+                    BitArrayOperator.SetBit(ComponentMask, meta.Id, true);
+                    offset += MathEx.AlignUp(meta.Size * EntitiesPerChunk, GlobalSetting.ComponentAlign);
+                }
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public Entity CreateEntity(out ushort chunkEntityIndex)
+        public Entity CreateEntity(out EntityInfo entityInfo, int sharedComponentsKey = 0)
         {
-            if (Chunks == null || Chunks.Count >= EntitiesPerChunk)
+            if (!SharedChunks.TryGetValue(sharedComponentsKey, out var chunk) || chunk.Count >= EntitiesPerChunk)
             {
                 var newChunk = GlobalObjectPool<Chunk>.Create();
-                newChunk.Previous = Chunks;
+                newChunk.Previous = chunk;
                 newChunk.Sparse = Sparse;
-                Chunks = newChunk;
+                chunk = SharedChunks[sharedComponentsKey] = newChunk;
             }
 
-            chunkEntityIndex = Chunks.Count++;
-            var eti = new EntityInfo(World.GenVersion(), Index, chunkEntityIndex, Chunks);
-            var id = checked((ushort)World.EntityInfos.Add(eti));
-            return *Chunks.GetEntity(eti.ChunkEntityIndex) = new Entity(id, eti.Version);
+            var chunkEntityIndex = chunk.Count++;
+            entityInfo = new EntityInfo(World.GenVersion(), Index, chunkEntityIndex, chunk);
+            var id = checked((ushort)World.EntityInfos.Add(entityInfo));
+            return *chunk.GetEntity(entityInfo.IndexInChunk) = new Entity(id, entityInfo.Version);
         }
 
         /// <summary>
@@ -94,59 +99,40 @@ namespace FLib.WorldCores
         public void RemoveEntity(in EntityInfo eti)
         {
             var chunk = eti.Chunk;
-            // if (--chunk.Count <= 0)
-            // {
-            //     SharedChunks.Remove(chunk.SharedComponentHash);
-            //     GlobalObjectPool<Chunk>.Release(chunk);
-            //     return;
-            // }
-            //
-            // if (eti.ChunkEntityIndex == chunk.Count)
-            //     return;
-            //
-            var et = *chunk.GetEntity(eti.ChunkEntityIndex);
-            // for (var i = 0; i < ComponentTypes.Length; i++)
-            // {
-            //     var meta = ComponentTypes[i];
-            //     ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)chunk.Get(eti.ChunkEntityIndex, meta), World, et);
-            // }
-            //
-            // var srcIndex = (ushort)(chunk.Count - 1);
-            // var dstIndex = eti.ChunkEntityIndex;
-            // for (var i = 0; i < ComponentTypes.Length; i++)
-            // {
-            //     var meta = ComponentTypes[i];
-            //     Unsafe.CopyBlock(chunk.Get(dstIndex, meta), chunk.Get(srcIndex, meta), meta.Size);
-            // }
-            //
-            // *chunk.GetEntity(dstIndex) = *chunk.GetEntity(srcIndex);
+            if (--chunk.Count <= 0)
+            {
+                SharedChunks.Remove(chunk.SharedComponentsKey);
+                GlobalObjectPool<Chunk>.Release(chunk);
+                return;
+            }
 
-            var backEt = *Chunks.GetEntity(Chunks.Count - 1);
-            ref var backEti = ref World.EntityInfos.GetRef(backEt.Id);
+            if (eti.IndexInChunk == chunk.Count)
+                return;
 
+            var et = *chunk.GetEntity(eti.IndexInChunk);
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
-                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)chunk.Get(eti.ChunkEntityIndex, meta), World, et);
+                ComponentRegistry.GetInfo(meta).ComponentDestroy?.Invoke(ref *(byte*)chunk.Get(eti.IndexInChunk, meta), World, et);
             }
 
+            var srcIndex = (ushort)(chunk.Count - 1);
+            var dstIndex = eti.IndexInChunk;
             for (var i = 0; i < ComponentTypes.Length; i++)
             {
                 var meta = ComponentTypes[i];
-                Buffer.MemoryCopy(Chunks.Get(backEti.ChunkEntityIndex, meta),
-                    chunk.Get(eti.ChunkEntityIndex, meta),
-                    ushort.MaxValue, meta.Size);
+                Unsafe.CopyBlock(chunk.Get(dstIndex, meta), chunk.Get(srcIndex, meta), meta.Size);
             }
 
-            backEti.Chunk = chunk;
-            backEti.ChunkEntityIndex = eti.ChunkEntityIndex;
-            *chunk.GetEntity(eti.ChunkEntityIndex) = backEt;
-            if (--Chunks.Count <= 0)
-            {
-                var temp = Chunks;
-                Chunks = Chunks.Previous;
-                GlobalObjectPool<Chunk>.Release(temp);
-            }
+            *chunk.GetEntity(dstIndex) = *chunk.GetEntity(srcIndex);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetSharedComponent<T>(in EntityInfo eti, in T value) where T : ISharedComponent
+        {
+            // World.SoaComponent.GetGroup<T>().
         }
 
         /// <summary>
@@ -154,26 +140,18 @@ namespace FLib.WorldCores
         /// </summary>
         public void Dispose()
         {
-            var chunk = Chunks;
-            Chunks = null;
-            while (chunk != null)
+            foreach (var kv in SharedChunks)
             {
-                var temp = chunk;
-                chunk = chunk.Previous;
-                GlobalObjectPool<Chunk>.Release(temp);
+                var chunk = kv.Value;
+                while (chunk != null)
+                {
+                    var temp = chunk;
+                    chunk = chunk.Previous;
+                    GlobalObjectPool<Chunk>.Release(temp);
+                }
             }
-            // foreach (var kv in SharedChunks)
-            // {
-            //     var chunk = kv.Value;
-            //     while (chunk != null)
-            //     {
-            //         var temp = chunk;
-            //         chunk = chunk.Previous;
-            //         GlobalObjectPool<Chunk>.Release(temp);
-            //     }
-            // }
-            //
-            // SharedChunks.Clear();
+
+            SharedChunks.Clear();
         }
     }
 }

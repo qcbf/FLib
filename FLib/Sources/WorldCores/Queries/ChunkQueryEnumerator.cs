@@ -41,11 +41,11 @@ namespace FLib.WorldCores
         /// </summary>
         private bool NextArchetype()
         {
-            while (Archetypes.Count > ++_archetypeIndex && Archetypes[_archetypeIndex].Chunks?.Count > 0)
-            {
-                Current = Archetypes[_archetypeIndex].Chunks;
-                return true;
-            }
+            // while (Archetypes.Count > ++_archetypeIndex && Archetypes[_archetypeIndex].Chunks?.Count > 0)
+            // {
+            //     Current = Archetypes[_archetypeIndex].Chunks;
+            //     return true;
+            // }
 
             return false;
         }

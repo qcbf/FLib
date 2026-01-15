@@ -4,7 +4,7 @@ using System;
 
 namespace FLib.WorldCores
 {
-    public interface IDynamicComponentGroupable
+    public interface ISoaComponentGroupable
     {
         WorldCore World { get; set; }
         Array Components { get; }
@@ -17,7 +17,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 释放动态组件
         /// </summary>
-        void Free(in Entity et, int index);
+        void Free(in Entity et, int key);
 
         // /// <summary>
         // /// 

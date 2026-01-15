@@ -13,8 +13,8 @@ namespace FLib.WorldCores
         {
             ref readonly var eti = ref GetEntityInfo(et);
             if (eti.HasDynamicComponent && DynamicComponentSparse[eti.DynamicComponentSparseIndex].TryGet<T>(out var denseIndex))
-                return ref DynamicComponent.GetGroup<T>().Components[denseIndex];
-            return ref *eti.Chunk.Get<T>(eti.ChunkEntityIndex);
+                return ref Soa.GetGroup<T>().Components[denseIndex];
+            return ref *eti.Chunk.Get<T>(eti.IndexInChunk);
         }
     }
 }

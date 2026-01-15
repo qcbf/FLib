@@ -16,7 +16,7 @@ namespace FLib.WorldCores
             var dynIdx = GetEntityInfo(et).DynamicComponentSparseIndex;
             Debug.Assert(dynIdx >= 0);
             var compIdx = DynamicComponentSparse[dynIdx].Get<T>();
-            return ref DynamicComponent.GetGroup<T>().Components[compIdx];
+            return ref Soa.GetGroup<T>().Components[compIdx];
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace FLib.WorldCores
             var dynIdx = GetEntityInfo(et).DynamicComponentSparseIndex;
             Debug.Assert(dynIdx >= 0);
             var compIdx = DynamicComponentSparse[dynIdx].Get(type);
-            return DynamicComponent.GetGroup(type).Components.GetValue(compIdx);
+            return Soa.GetGroup(type).Components.GetValue(compIdx);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace FLib.WorldCores
         /// </summary>
         public void SetDyn<T>(Entity et, in T component)
         {
-            var group = DynamicComponent.GetGroup<T>();
+            var group = Soa.GetGroup<T>();
             var compIdx = DynamicComponentIndex(et, group, ComponentRegistry.GetId<T>());
             group.Components[compIdx] = component;
         }
@@ -46,7 +46,7 @@ namespace FLib.WorldCores
         public void SetDyn(Entity et, object component, Type componentType)
         {
             componentType ??= component.GetType();
-            var group = DynamicComponent.GetGroup(componentType);
+            var group = Soa.GetGroup(componentType);
             var compIdx = DynamicComponentIndex(et, group, ComponentRegistry.GetId(componentType));
             group.Components.SetValue(component, compIdx);
         }
@@ -60,7 +60,7 @@ namespace FLib.WorldCores
             ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIndex);
             var id = ComponentRegistry.GetId<T>();
             var compIdx = sparse.GetAndClear(id);
-            DynamicComponent.GetGroup<T>().Free(et, compIdx);
+            Soa.GetGroup<T>().Free(et, compIdx);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace FLib.WorldCores
             ref var sparse = ref DynamicComponentSparse.GetRef(eti.DynamicComponentSparseIndex);
             var id = ComponentRegistry.GetId(type);
             var compIdx = sparse.GetAndClear(id);
-            DynamicComponent.GetGroup(type).Free(et, compIdx);
+            Soa.GetGroup(type).Free(et, compIdx);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace FLib.WorldCores
         /// 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private int DynamicComponentIndex(Entity et, IDynamicComponentGroupable group, IncrementId componentId)
+        private int DynamicComponentIndex(Entity et, ISoaComponentGroupable group, IncrementId componentId)
         {
             ref var eti = ref GetEntityInfo(et);
             int compIdx;
