@@ -126,6 +126,7 @@ namespace FLib.WorldCores.Effects
                         Entity.DispatchEvent(evt);
                         return effect;
                     case EWorldEffectAddOption.AddStack:
+                    case EWorldEffectAddOption.AddStackAndTimeoutAllStack:
                         AddEffectStackCount(effect, ref evt.AddCount);
                         effect.OnStackCountChange(evt.AddCount);
                         Entity.DispatchEvent(evt);

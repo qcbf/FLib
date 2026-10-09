@@ -27,7 +27,7 @@ namespace FLib.WorldCores.Effects
             if (world.Time >= EndTime)
             {
                 ResetTime(world.Time);
-                Effect.RemoveSelf(1);
+                Effect.RemoveSelf((Effect.AddOption & EWorldEffectAddOption.AddStackAndTimeoutAllStack) == 0 ? (ushort)1 : ushort.MaxValue);
             }
         }
 
