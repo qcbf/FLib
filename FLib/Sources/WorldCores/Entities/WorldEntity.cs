@@ -164,9 +164,6 @@ namespace FLib.WorldCores.Entities
         /// <summary> 设置实体的动态组件（通过脚本） </summary>
         public int SetDynScript(in ScriptPackBytes script) => World.SetDynScript(Id, script);
 
-        /// <summary> 设置实体的动态组件（通过脚本） </summary>
-        public int SetDynScript<T>(in ScriptPackBytes<T> script) where T : IBytesPackable => World.SetDynScript(Id, script);
-
         /// <summary>
         /// 移除实体的动态组件。
         /// </summary>

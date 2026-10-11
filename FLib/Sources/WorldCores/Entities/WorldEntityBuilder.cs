@@ -82,6 +82,25 @@ namespace FLib.WorldCores.Entities
         /// <summary>
         /// 
         /// </summary>
+        public WorldEntityBuilder SetDynScript(in ScriptPackBytes script)
+        {
+            Debug.Assert(!EntityId.IsEmpty, "must call PrepareEntity first");
+            ref readonly var compInfo = ref WorldComponentRegistry.GetInfo(script.ScriptType);
+            var id = compInfo.Meta.Id;
+            ref var eti = ref World.GetEntityInfo(Entity);
+            var group = World.DynComponentGroups.Get(id);
+            World.TryAddRequiredComponents(EntityId, compInfo);
+            var slot = World.EnsureDynamicComponentIndex(id, ref eti) = group.AllocWithoutAwake(EntityId);
+            if (compInfo.Type.IsClass)
+                group.Components.SetValue(TypeAssistant.New(compInfo.Type), slot);
+            WorldComponentRegistry.GetSerializationWrapper(compInfo.Type).Deserialize(ref group.GetPointer(slot), script.InstanceBytes.Span);
+            DynComponents.Add(new WorldSoaComponentHandle(slot, id));
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="initMemory">是否初始化内存, false:性能会更高,但会导致字段不是默认值</param>
         public WorldEntityBuilder PrepareEntity(bool initMemory = true)
         {
