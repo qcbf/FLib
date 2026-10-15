@@ -8,7 +8,7 @@ namespace FLib
     /// <summary>在二进制数据与 Base91 文本之间进行编码和解码。</summary>
     public static class Base91
     {
-        private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
+        private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,.-:;<=>'@[]^_`{|}~\"";
         private static readonly sbyte[] DecodeTable = CreateDecodeTable();
 
         private static sbyte[] CreateDecodeTable()
