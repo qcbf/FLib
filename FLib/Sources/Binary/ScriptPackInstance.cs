@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -76,9 +77,19 @@ namespace FLib
 
             nodes.Nodes[--nodes.Position].Token = EJson5Token.ObjectOpen;
             --reader.BracketOpenCount; // 因为上面 Token = EJson5Token.ObjectOpen 强制再open了一次, 为了让下面的json正确走入ObjectOpen解析
-            var o = nodes.To(TypeAssistant.GetType(typeName));
-            System.Diagnostics.Debug.Assert(o is IBytesPackable, $"TypeAssistant.GetType({typeName}) return {o.GetType()}, not IBytesPackable");
-            instance = (IBytesPackable)o;
+            var type = TypeAssistant.GetType(typeName);
+            try
+            {
+                Debug.Assert(type != null, $"not found script {typeName}");
+                var o = nodes.To(type);
+                Debug.Assert(o is IBytesPackable, $"type {typeName} is not IBytesPackable");
+                instance = (IBytesPackable)o;
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"deserialize script {typeName} error", e);
+            }
+
             reader.Close(ref nodes);
             return true;
         }
