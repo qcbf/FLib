@@ -57,7 +57,7 @@ namespace FLib.Unity
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"map error: {root.name}>{obj.name} {e}");
+                    throw new Exception($"map error: {root.name}>{obj.name}", e);
                 }
             }
             return;

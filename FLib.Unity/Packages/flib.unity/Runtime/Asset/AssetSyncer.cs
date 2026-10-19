@@ -161,7 +161,7 @@ namespace FLib.Unity
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"download error {downloadCdnFileMeta.FileNameStr} {ex}");
+                    throw new Exception($"download error {downloadCdnFileMeta.FileNameStr}", ex);
                 }
             }
 

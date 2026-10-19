@@ -70,10 +70,10 @@ namespace FLib.Unity
                 }
                 catch (Exception ex)
                 {
-                    var log = $"{loading.Path}\n{ex}";
+                    var log = loading.Path;
                     AssetLoadingDict.Remove(loading.Path);
                     AssetLoadings.RemoveAt(iterator.Index);
-                    throw new Exception(log);
+                    throw new Exception(log, ex);
                 }
             }
         }

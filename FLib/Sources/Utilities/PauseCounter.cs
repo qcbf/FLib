@@ -27,7 +27,7 @@ namespace FLib
             }
             catch (Exception ex)
             {
-                throw new Exception($"pause component[{name}] overflow {CurrentPauseCount} {addCount} {ex}");
+                throw new Exception($"pause component[{name}] overflow {CurrentPauseCount} {addCount}", ex);
             }
         }
 

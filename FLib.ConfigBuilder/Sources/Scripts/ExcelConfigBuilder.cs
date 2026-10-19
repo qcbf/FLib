@@ -149,7 +149,7 @@ namespace FLib
                             }
                             catch (Exception ex)
                             {
-                                throw new Exception($"parse field [num:{col}, {fieldName}] error\n" + ex);
+                                throw new Exception($"parse field [num:{col}, {fieldName}] error", ex);
                             }
                         }
 

@@ -26,7 +26,7 @@ namespace FLib.Unity.DynamicAtlases
             }
             catch (Exception e)
             {
-                throw new Exception($"{transform.GetTransformPath()}\n{e}");
+                throw new Exception(transform.GetTransformPath(), e);
             }
         }
 

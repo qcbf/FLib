@@ -69,7 +69,7 @@ namespace FLib.Unity
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"bake failure clip[{i}] {e}");
+                    throw new Exception($"bake failure clip[{i}]", e);
                 }
             }
 

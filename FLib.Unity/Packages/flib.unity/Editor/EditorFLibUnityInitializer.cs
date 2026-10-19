@@ -66,7 +66,7 @@ namespace FLib.Unity.Editor
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"{item.name} {cfgAttr.ConfigFileName} {e}");
+                    throw new Exception($"{item.name} {cfgAttr.ConfigFileName}", e);
                 }
             }
         }

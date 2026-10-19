@@ -132,7 +132,7 @@ namespace FLib.WorldCores.Components
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"nonsupport serialization {TypeAssistant.GetTypeName(type)} {e}");
+                    throw new Exception($"nonsupport serialization {TypeAssistant.GetTypeName(type)}", e);
                 }
 
                 return wrapper;

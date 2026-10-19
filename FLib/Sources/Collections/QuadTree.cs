@@ -272,7 +272,7 @@ namespace FLib.Collections
                             }
                             catch (Exception e)
                             {
-                                throw new Exception($" {mergeToParentId} | {Tree.Nodes.Count} | {Tree.Nodes.NodeBuffer?.Length} | {e}");
+                                throw new Exception($" {mergeToParentId} | {Tree.Nodes.Count} | {Tree.Nodes.NodeBuffer?.Length}", e);
                             }
                         }
 

@@ -26,7 +26,7 @@ namespace FLib.Unity
             }
             catch (Exception e)
             {
-                throw new Exception($"{name} {e}");
+                throw new Exception(name, e);
             }
         }
 
