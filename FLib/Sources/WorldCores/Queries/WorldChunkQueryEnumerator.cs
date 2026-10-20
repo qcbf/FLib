@@ -24,7 +24,7 @@ namespace FLib.WorldCores.Queries
         public WorldChunkQueryEnumerator(in WorldQueryFilter filter)
         {
             _sharedComponents = filter.SharedComponents;
-            _archetypeEnumerator = new WorldArchetypeQueryEnumerator(filter.Archetypes);
+            _archetypeEnumerator = filter.GetArchetypeEnumerator();
             _sharedChunkEnumerator = default;
             _chunks = null;
             _chunkIndex = -1;

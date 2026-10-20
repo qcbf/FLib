@@ -6,43 +6,45 @@ using FLib.WorldCores.Archetypes;
 
 namespace FLib.WorldCores.Queries
 {
-    public readonly struct WorldQueryFilter
+    public sealed class WorldQueryFilter
     {
-        internal readonly WorldArchetype[] Archetypes;
-        internal readonly WorldQuerySharedComponent[] SharedComponents;
+        private readonly WorldArchetypeGroup _group;
+        private readonly WorldQueryFilterBuilder _builder;
+        private WorldArchetype[] _archetypes = Array.Empty<WorldArchetype>();
+        private int _matchedCount;
+        private int _scannedCount;
 
-        public bool IsEmpty => Archetypes == null;
+        internal readonly WorldQuerySharedComponent[] SharedComponents;
 
         public WorldQueryFilter(WorldCore world, in WorldQueryFilterBuilder builder)
         {
-            using var archetypes = new PooledList<WorldArchetype>();
-            for (ushort i = 0; i < world.ArchetypeGroup.Count; i++)
+            _group = world.ArchetypeGroup;
+            // Builder masks are mutable; a built query owns its conditions.
+            _builder = new WorldQueryFilterBuilder(world)
             {
-                var archetype = world.ArchetypeGroup[i];
-                if (builder.Match(archetype))
-                    archetypes.Add(archetype);
-            }
-
-            Archetypes = archetypes.ToArray();
+                AllMask = (ulong[])builder.AllMask?.Clone(),
+                AnyMask = (ulong[])builder.AnyMask?.Clone(),
+                NoneMask = (ulong[])builder.NoneMask?.Clone()
+            };
             SharedComponents = builder.SharedComponents?.ToArray() ?? Array.Empty<WorldQuerySharedComponent>();
         }
 
-        // /// <summary>
-        // /// 
-        // /// </summary>
-        // public void Combine(in QueryFilter filter)
-        // {
-        //     if (filter.Archetypes?.Length > 0)
-        //     {
-        //         using var archetypeSets = new PooledHashSet<Archetype>();
-        //         archetypeSets.Raw.EnsureCapacity(Archetypes.Length + filter.Archetypes.Length);
-        //         for (var i = 0; i < Archetypes.Length; i++)
-        //             archetypeSets.Add(Archetypes[i]);
-        //         for (var i = 0; i < filter.Archetypes.Length; i++)
-        //         {
-        //             if (archetypeSets.Add(filter.Archetypes[i]))
-        //         }
-        //     }
-        // }
+        // ReSharper disable once NotDisposedResourceIsReturned
+        internal WorldArchetypeQueryEnumerator GetArchetypeEnumerator()
+        {
+            var count = _group.Count;
+            // Archetypes are append-only. Filter copies share this scan cursor and cache.
+            for (; _scannedCount < count; ++_scannedCount)
+            {
+                var archetype = _group[(ushort)_scannedCount];
+                if (!_builder.Match(archetype))
+                    continue;
+                if (_matchedCount == _archetypes.Length)
+                    Array.Resize(ref _archetypes, Math.Max(4, MathEx.GetNextCapacityLength(_matchedCount)));
+                _archetypes[_matchedCount++] = archetype;
+            }
+
+            return new WorldArchetypeQueryEnumerator(_archetypes, _matchedCount);
+        }
     }
 }

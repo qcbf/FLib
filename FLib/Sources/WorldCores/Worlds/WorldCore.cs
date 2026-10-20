@@ -146,7 +146,7 @@ namespace FLib.WorldCores
         /// </summary>
         /// <param name="filter">查询过滤器条件</param>
         /// <returns>查询枚举器</returns>
-        public WorldQueryEnumerator Query(in WorldQueryFilter filter = default) => new(this, filter);
+        public WorldQueryEnumerator Query(in WorldQueryFilter filter = null) => new(this, filter);
 
         /// <summary>
         /// 执行一次世界更新，包含增加帧数和运行所有更新器。

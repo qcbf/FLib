@@ -23,7 +23,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<<#= genericParams #>> Query<<#= genericParams #>>(in WorldQueryFilter filter = default) <#= genericWheres #> => new(this, filter);
+        public QueryEnumerator<<#= genericParams #>> Query<<#= genericParams #>>(in WorldQueryFilter filter = null) <#= genericWheres #> => new(this, filter);
 
         /// <summary>
         /// 
@@ -37,7 +37,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world)<#= T(1, i, "", n => $".WithAll<T{n}>()") #>.Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, <#= refComps #>)>

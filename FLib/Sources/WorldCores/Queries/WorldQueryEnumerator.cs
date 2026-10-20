@@ -20,7 +20,7 @@ namespace FLib.WorldCores.Queries
         public WorldQueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
         {
             Filter = filter;
-            if (Filter.IsEmpty)
+            if (Filter == null)
                 Filter = new WorldQueryFilterBuilder(world).Build();
         }
 

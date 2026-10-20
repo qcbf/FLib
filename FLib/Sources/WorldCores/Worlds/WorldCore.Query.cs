@@ -1,4 +1,4 @@
-﻿// ==================== qcbf@qq.com | 2026-07-12 ====================
+// ==================== qcbf@qq.com | 2026-07-12 ====================
 
 
 using System.Collections;
@@ -14,7 +14,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1> Query<T1>(in WorldQueryFilter filter = default) where T1 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1> Query<T1>(in WorldQueryFilter filter = null) where T1 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -28,7 +28,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>)>
@@ -82,7 +82,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2> Query<T1, T2>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2> Query<T1, T2>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -96,7 +96,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>)>
@@ -153,7 +153,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3> Query<T1, T2, T3>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3> Query<T1, T2, T3>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -167,7 +167,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>)>
@@ -227,7 +227,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3, T4> Query<T1, T2, T3, T4>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3, T4> Query<T1, T2, T3, T4>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -241,7 +241,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().WithAll<T4>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>, Ref<T4>)>
@@ -304,7 +304,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3, T4, T5> Query<T1, T2, T3, T4, T5>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3, T4, T5> Query<T1, T2, T3, T4, T5>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -318,7 +318,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().WithAll<T4>().WithAll<T5>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>, Ref<T4>, Ref<T5>)>
@@ -384,7 +384,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3, T4, T5, T6> Query<T1, T2, T3, T4, T5, T6>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3, T4, T5, T6> Query<T1, T2, T3, T4, T5, T6>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -398,7 +398,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().WithAll<T4>().WithAll<T5>().WithAll<T6>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>, Ref<T4>, Ref<T5>, Ref<T6>)>
@@ -467,7 +467,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3, T4, T5, T6, T7> Query<T1, T2, T3, T4, T5, T6, T7>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3, T4, T5, T6, T7> Query<T1, T2, T3, T4, T5, T6, T7>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -481,7 +481,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().WithAll<T4>().WithAll<T5>().WithAll<T6>().WithAll<T7>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>, Ref<T4>, Ref<T5>, Ref<T6>, Ref<T7>)>
@@ -553,7 +553,7 @@ namespace FLib.WorldCores
         /// <summary>
         /// 
         /// </summary>
-        public QueryEnumerator<T1, T2, T3, T4, T5, T6, T7, T8> Query<T1, T2, T3, T4, T5, T6, T7, T8>(in WorldQueryFilter filter = default) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged => new(this, filter);
+        public QueryEnumerator<T1, T2, T3, T4, T5, T6, T7, T8> Query<T1, T2, T3, T4, T5, T6, T7, T8>(in WorldQueryFilter filter = null) where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged where T5 : unmanaged where T6 : unmanaged where T7 : unmanaged where T8 : unmanaged => new(this, filter);
 
         /// <summary>
         /// 
@@ -567,7 +567,7 @@ namespace FLib.WorldCores
             public QueryEnumerator(in WorldCore world, in WorldQueryFilter filter)
             {
                 _filter = filter;
-                if (_filter.IsEmpty)
+                if (_filter == null)
                     _filter = new WorldQueryFilterBuilder(world).WithAll<T1>().WithAll<T2>().WithAll<T3>().WithAll<T4>().WithAll<T5>().WithAll<T6>().WithAll<T7>().WithAll<T8>().Build();
             }
             public struct Enumerable : IEnumerator<(WorldEntityId, Ref<T1>, Ref<T2>, Ref<T3>, Ref<T4>, Ref<T5>, Ref<T6>, Ref<T7>, Ref<T8>)>
