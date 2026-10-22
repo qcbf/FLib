@@ -2,65 +2,85 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using FLib;
 
 namespace FLib
 {
+    [Serializable]
     public struct EncryptedInt
     {
-        public static int Key = Environment.TickCount;
+        private const int RotateBits = 5;
 
-        public int Raw;
+        private int _value;
+        private int _key;
 
-        public readonly override string ToString() => Get().ToString();
+        private static uint _seed;
 
-        public static EncryptedInt Create(int v = 0)
+        public EncryptedInt(int v)
         {
-            var result = new EncryptedInt();
-            result.Set(v);
-            return result;
+            _key = NextKey();
+            _value = RotL(v, RotateBits) ^ _key;
         }
 
-        public void Add(int v)
-        {
-            Set(Get() + v);
-        }
-
-        public void Sub(int v)
-        {
-            Set(Get() - v);
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(int v)
         {
-            var temp = v & 0xf;
-            Raw = (((v & ~0xf) << 1) | temp) ^ Key;
+            var key = NextKey();
+            _key = key;
+            _value = RotL(v, RotateBits) ^ key;
         }
 
-        public readonly int Get()
-        {
-            var v = Raw ^ Key;
-            var temp = v & 0xf;
-            return (v >> 1) & ~0xf | temp;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly int Get() => RotR(_value ^ _key, RotateBits);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(int v) => Set(unchecked(Get() + v));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sub(int v) => Set(unchecked(Get() - v));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Refresh() => Set(Get());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString() => Get().ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int(in EncryptedInt v) => v.Get();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator EncryptedInt(int v) => new(v);
 
-        public void Z_BytesPackRead(int key, ref BytesReader reader)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static EncryptedInt operator +(in EncryptedInt a, int b) => new(unchecked(a.Get() + b));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static EncryptedInt operator -(in EncryptedInt a, int b) => new(unchecked(a.Get() - b));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static EncryptedInt operator ++(EncryptedInt a) => new(unchecked(a.Get() + 1));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static EncryptedInt operator --(EncryptedInt a) => new(unchecked(a.Get() - 1));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int NextKey()
         {
-            Raw = key switch
-            {
-                2 => (int)reader.ReadVInt(),
-                _ => Raw
-            };
+            var s = _seed;
+            if (s == 0) s = (uint)Stopwatch.GetTimestamp() | 1u;
+            s ^= s << 13;
+            s ^= s >> 17;
+            s ^= s << 5;
+            _seed = s;
+            return (int)s;
         }
 
-        public readonly void Z_BytesPackWrite(ref BytesPack.KeyHelper key, ref BytesWriter writer)
-        {
-            key.Push(ref writer, 2);
-            writer.PushVInt(Raw);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int RotL(int x, int n) => (int)(((uint)x << n) | ((uint)x >> (32 - n)));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int RotR(int x, int n) => (int)(((uint)x >> n) | ((uint)x << (32 - n)));
     }
 }
