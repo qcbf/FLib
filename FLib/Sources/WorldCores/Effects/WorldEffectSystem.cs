@@ -50,8 +50,6 @@ namespace FLib.WorldCores.Effects
         public void OnComponentDestroy(WorldCore world, WorldEntityId entityId)
         {
             FlagMask |= 0x80000000;
-            if (Container.Effects.Count > 0)
-                Log.Info?.Write("", nameof(WorldEffectSystem), nameof(OnComponentDestroy));
             Clear();
             world.Assert(Container.Effects.Count == 0);
             WorldEffectPool.FreeContainer(_containerIndex);

@@ -33,7 +33,7 @@ namespace FLib
         {
             get
             {
-                if (index < 0 || index >= Count) throw new IndexOutOfRangeException(index.ToString() + "/" + Count);
+                if (index < 0 || index >= Count) throw new IndexOutOfRangeException(index + "/" + Count);
                 return ref Buffer[index];
             }
         }
