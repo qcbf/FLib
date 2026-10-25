@@ -1,17 +1,18 @@
 // ==================={By Qcbf|qcbf@qq.com|2/25/2022 12:30:31 PM}===================
 
-using FLib;
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using FLib.Collections;
 
 namespace FLib
 {
+    /// <summary>独占数组所有权的值类型；持有 Buffer 后不得复制，归还后不得访问 Buffer/Span/枚举器。</summary>
     public struct PooledList<T> : IList<T>, IDisposable
     {
         public T[] Buffer;
+        private readonly ArrayCollectionPool<T> _pool;
 
         public int Count { get; set; }
 
@@ -20,6 +21,7 @@ namespace FLib
         public readonly Memory<T> Memory => new(Buffer, 0, Count);
         public readonly bool IsInitialized => Buffer != null;
         public readonly bool IsEmpty => Count == 0;
+        public readonly int Capacity => Buffer?.Length ?? 0;
 
         readonly bool ICollection<T>.IsReadOnly => false;
 
@@ -46,6 +48,7 @@ namespace FLib
             public bool DisposeBuffer;
             public T[] Buffer;
             public int Count;
+            public ArrayCollectionPool<T> Pool;
             private int _index;
             public T Current => Buffer[_index - 1];
             object IEnumerator.Current => Current;
@@ -54,10 +57,12 @@ namespace FLib
 
             public void Dispose()
             {
-                if (DisposeBuffer)
-                    ArrayPool<T>.Shared.Return(Buffer);
-                else
-                    Reset();
+                if (!DisposeBuffer) { Reset(); return; }
+                var buffer = Buffer;
+                Buffer = null;
+                Count = 0;
+                Reset();
+                if (buffer != null) (Pool ?? ArrayCollectionPool<T>.Shared).Return(buffer);
             }
         }
 
@@ -68,15 +73,24 @@ namespace FLib
         {
             public T[] Buffer;
             public int Count;
-            public IEnumerator<T> GetEnumerator() => new Enumerator() { Buffer = Buffer, Count = Count, DisposeBuffer = true };
+            public ArrayCollectionPool<T> Pool;
+            public Enumerator GetEnumerator()
+            {
+                var enumerator = new Enumerator { Buffer = Buffer, Count = Count, DisposeBuffer = true, Pool = Pool };
+                Buffer = null;
+                Count = 0;
+                return enumerator;
+            }
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public PooledList(int capacity)
+        public PooledList(int capacity, ArrayCollectionPool<T> pool = null)
         {
+            _pool = pool;
             Buffer = null;
             Count = 0;
             Allocate(capacity);
@@ -95,12 +109,14 @@ namespace FLib
         /// </summary>
         public bool Allocate(int capacity)
         {
+            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
             if (Buffer?.Length >= capacity) return false;
-            var newArr = ArrayPool<T>.Shared.Rent(capacity);
+            var pool = _pool ?? ArrayCollectionPool<T>.Shared;
+            var newArr = pool.Rent(capacity);
             if (Buffer != null)
             {
-                System.Array.Copy(Buffer, newArr, Buffer.Length);
-                ArrayPool<T>.Shared.Return(Buffer);
+                System.Array.Copy(Buffer, newArr, Count);
+                pool.Return(Buffer);
             }
 
             Buffer = newArr;
@@ -192,15 +208,15 @@ namespace FLib
         /// <summary>
         /// 
         /// </summary>
-        public void Clear() => Clear(false);
+        public void Clear() => Clear(RuntimeHelpers.IsReferenceOrContainsReferences<T>());
 
         /// <summary>
         /// 
         /// </summary>
         public void Clear(bool clearArray)
         {
-            if (clearArray)
-                System.Array.Fill(Buffer, default, 0, Count);
+            if (clearArray && Count > 0)
+                System.Array.Clear(Buffer, 0, Count);
             Count = 0;
         }
 
@@ -238,7 +254,7 @@ namespace FLib
 
         public readonly void CopyTo(T[] array, int arrayIndex)
         {
-            Buffer?.CopyTo(array, arrayIndex);
+            System.Array.Copy(Buffer ?? System.Array.Empty<T>(), 0, array, arrayIndex, Count);
         }
 
         public readonly T[] ToArray()
@@ -256,9 +272,11 @@ namespace FLib
         public void ReleasePool(bool clearArray = false)
         {
             if (Buffer == null) return;
+            var buffer = Buffer;
             Count = 0;
-            ArrayPool<T>.Shared.Return(Buffer, clearArray);
             Buffer = null;
+            if (clearArray) System.Array.Clear(buffer, 0, buffer.Length);
+            (_pool ?? ArrayCollectionPool<T>.Shared).Return(buffer);
         }
 
         public void Dispose()
@@ -276,7 +294,7 @@ namespace FLib
 
         public EnumeratorWithDispose ForEachWithDispose()
         {
-            var rs = new EnumeratorWithDispose { Count = Count, Buffer = Buffer };
+            var rs = new EnumeratorWithDispose { Count = Count, Buffer = Buffer, Pool = _pool };
             Count = 0;
             Buffer = null;
             return rs;
