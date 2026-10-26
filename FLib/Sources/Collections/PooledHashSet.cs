@@ -8,6 +8,7 @@ namespace FLib
     /// <summary>独占集合所有权的值类型；持有集合后不得复制，不得在 Dispose 后使用 Raw/枚举器。</summary>
     public struct PooledHashSet<T> : ISet<T>, IDisposable
     {
+        private static readonly HashSet<T> Empty = new();
         private HashSet<T> _raw;
         private readonly HashSetPool<T> _pool;
 
@@ -28,18 +29,25 @@ namespace FLib
         public bool Remove(T item) => _raw?.Remove(item) == true;
         public readonly bool Contains(T item) => _raw?.Contains(item) == true;
         public void Clear() => _raw?.Clear();
-        public int EnsureCapacity(int capacity) => Raw.EnsureCapacity(capacity);
-        public void CopyTo(T[] array, int arrayIndex) => Raw.CopyTo(array, arrayIndex);
+        public int EnsureCapacity(int capacity)
+        {
+            if (_raw != null) return _raw.EnsureCapacity(capacity);
+            if (capacity == 0) return 0;
+            _raw = (_pool ?? HashSetPool<T>.Shared).Rent(capacity);
+            return Capacity;
+        }
+
+        public readonly void CopyTo(T[] array, int arrayIndex) => (_raw ?? Empty).CopyTo(array, arrayIndex);
         public void ExceptWith(IEnumerable<T> other) => Raw.ExceptWith(other);
         public void IntersectWith(IEnumerable<T> other) => Raw.IntersectWith(other);
         public void SymmetricExceptWith(IEnumerable<T> other) => Raw.SymmetricExceptWith(other);
         public void UnionWith(IEnumerable<T> other) => Raw.UnionWith(other);
-        public bool IsProperSubsetOf(IEnumerable<T> other) => Raw.IsProperSubsetOf(other);
-        public bool IsProperSupersetOf(IEnumerable<T> other) => Raw.IsProperSupersetOf(other);
-        public bool IsSubsetOf(IEnumerable<T> other) => Raw.IsSubsetOf(other);
-        public bool IsSupersetOf(IEnumerable<T> other) => Raw.IsSupersetOf(other);
-        public bool Overlaps(IEnumerable<T> other) => Raw.Overlaps(other);
-        public bool SetEquals(IEnumerable<T> other) => Raw.SetEquals(other);
+        public readonly bool IsProperSubsetOf(IEnumerable<T> other) => (_raw ?? Empty).IsProperSubsetOf(other);
+        public readonly bool IsProperSupersetOf(IEnumerable<T> other) => (_raw ?? Empty).IsProperSupersetOf(other);
+        public readonly bool IsSubsetOf(IEnumerable<T> other) => (_raw ?? Empty).IsSubsetOf(other);
+        public readonly bool IsSupersetOf(IEnumerable<T> other) => (_raw ?? Empty).IsSupersetOf(other);
+        public readonly bool Overlaps(IEnumerable<T> other) => (_raw ?? Empty).Overlaps(other);
+        public readonly bool SetEquals(IEnumerable<T> other) => (_raw ?? Empty).SetEquals(other);
 
         public void Dispose()
         {
@@ -49,9 +57,9 @@ namespace FLib
             (_pool ?? HashSetPool<T>.Shared).Return(raw);
         }
 
-        public HashSet<T>.Enumerator GetEnumerator() => Raw.GetEnumerator();
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public readonly HashSet<T>.Enumerator GetEnumerator() => (_raw ?? Empty).GetEnumerator();
+        readonly IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         void ICollection<T>.Add(T item) => Add(item);
         bool ISet<T>.Add(T item) => Add(item);
     }

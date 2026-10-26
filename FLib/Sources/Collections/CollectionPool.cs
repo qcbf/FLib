@@ -144,37 +144,19 @@ namespace FLib.Collections
         public static int AlignedSize<T>() => (Unsafe.SizeOf<T>() + IntPtr.Size - 1) & -IntPtr.Size;
     }
 
-    /// <summary>数组池；PooledList 的底层储存也使用此池。含引用数组在入池前整段清空。</summary>
-    public sealed class ArrayCollectionPool<T> : CollectionPool<T[]>
-    {
-        public static ArrayCollectionPool<T> Shared { get; } = new();
-
-        public ArrayCollectionPool(int minCapacity = 16, int maxCapacity = 65536,
-            long maxBytesPerBucket = 256 * 1024, int maxCountPerBucket = 128)
-            : base(minCapacity, maxCapacity, maxBytesPerBucket, maxCountPerBucket) { }
-
-        protected override T[] Create(int capacity) => new T[capacity];
-        protected override int GetCapacity(T[] item) => item.Length;
-        protected override long EstimateBytes(int capacity) => (long)capacity * Unsafe.SizeOf<T>() + 4 * IntPtr.Size;
-        protected override void Reset(T[] item)
-        {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>()) Array.Clear(item, 0, item.Length);
-        }
-    }
-
-    public sealed class ListPool<T> : CollectionPool<List<T>>
-    {
-        public static ListPool<T> Shared { get; } = new();
-
-        public ListPool(int minCapacity = 16, int maxCapacity = 65536,
-            long maxBytesPerBucket = 256 * 1024, int maxCountPerBucket = 128)
-            : base(minCapacity, maxCapacity, maxBytesPerBucket, maxCountPerBucket) { }
-
-        protected override List<T> Create(int capacity) => new(capacity);
-        protected override int GetCapacity(List<T> item) => item.Capacity;
-        protected override long EstimateBytes(int capacity) => (long)capacity * Unsafe.SizeOf<T>() + 10 * IntPtr.Size;
-        protected override void Reset(List<T> item) => item.Clear();
-    }
+    // public sealed class ListPool<T> : CollectionPool<List<T>>
+    // {
+    //     public static ListPool<T> Shared { get; } = new();
+    //
+    //     public ListPool(int minCapacity = 16, int maxCapacity = 65536,
+    //         long maxBytesPerBucket = 256 * 1024, int maxCountPerBucket = 128)
+    //         : base(minCapacity, maxCapacity, maxBytesPerBucket, maxCountPerBucket) { }
+    //
+    //     protected override List<T> Create(int capacity) => new(capacity);
+    //     protected override int GetCapacity(List<T> item) => item.Capacity;
+    //     protected override long EstimateBytes(int capacity) => (long)capacity * Unsafe.SizeOf<T>() + 10 * IntPtr.Size;
+    //     protected override void Reset(List<T> item) => item.Clear();
+    // }
 
     /// <summary>每个池固定一个 Comparer；自定义 Comparer 使用独立池，不进入 Shared。</summary>
     public sealed class HashSetPool<T> : CollectionPool<HashSet<T>>

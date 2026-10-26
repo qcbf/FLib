@@ -33,6 +33,9 @@ namespace FLib.WorldCores.Archetypes
         public void Dispose()
         {
             ComponentTypes.Dispose();
+#if DEBUG
+            _componentIds.Dispose();
+#endif
         }
 
         /// <summary>

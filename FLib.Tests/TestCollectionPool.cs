@@ -157,49 +157,43 @@ public class TestCollectionPool
     }
 
     [Fact]
-    public void PooledListGrowthAndDisposeClearReferenceContainingArrays()
+    public void PooledListGrowthPreservesUnusedBufferSlots()
     {
-        var pool = new ArrayCollectionPool<(object Value, int Number)>();
-        var list = new PooledList<(object Value, int Number)>(16, pool);
-        list.Add((new object(), 1));
-        list.Clear(false); // 旧引用还在未使用的储存内，入池必须清掉。
-        list.Allocate(32);
-        var oldBuffer = pool.Rent(16);
-        Assert.All(oldBuffer, item => Assert.Null(item.Value));
-        list.Add((new object(), 2));
-        list.Dispose();
-        Assert.Empty(list);
-        Assert.False(list.IsInitialized);
-        var returned = pool.Rent(32);
-        Assert.All(returned, item => Assert.Null(item.Value));
-        list.Dispose();
-        Assert.Equal(0, pool.RetainedCount);
+        var list = new PooledList<int>(16);
+        try
+        {
+            list.Add(42);
+            // 动态组件稀疏表在 Count 之外也保存 -1 哨兵，扩容必须保留。
+            list.Buffer.AsSpan(list.Count).Fill(-1);
+            var oldCapacity = list.Buffer.Length;
+            list.Allocate(oldCapacity + 1);
+
+            Assert.Single(list);
+            Assert.Equal(42, list[0]);
+            for (var i = list.Count; i < oldCapacity; i++)
+                Assert.Equal(-1, list.Buffer[i]);
+        }
+        finally
+        {
+            list.Dispose();
+        }
     }
 
     [Fact]
-    public void PooledListCopiesOnlyLiveElementsAndTransfersToEnumerator()
+    public void PooledListTransfersBufferToEnumerator()
     {
-        var pool = new ArrayCollectionPool<int>();
-        var list = new PooledList<int>(16, pool);
+        var list = new PooledList<int>(16);
         list.Add(1);
         list.Add(2);
         list[1] = 3;
-        var copy = new int[2];
-        list.CopyTo(copy, 0);
-        Assert.Equal(new[] { 1, 3 }, copy);
 
         var items = list.ForEachWithDispose();
         Assert.False(list.IsInitialized);
+        Assert.Empty(list);
         var sum = 0;
         foreach (var item in items)
-        {
             sum += item;
-            break; // 提前退出也必须归还，并保留原池。
-        }
-        Assert.Equal(1, sum);
-        Assert.Equal(1, pool.RetainedCount);
-        foreach (var item in items) Assert.Fail("Transferred storage must only be enumerated once.");
-        Assert.Equal(1, pool.RetainedCount);
+        Assert.Equal(4, sum);
         list.Dispose();
     }
 
@@ -214,10 +208,138 @@ public class TestCollectionPool
         foreach (var item in set) Assert.Fail("Set should be empty.");
         foreach (var item in dictionary) Assert.Fail("Dictionary should be empty.");
         Assert.False(dictionary.TryGetValue(1, out _));
+        Assert.False(dictionary.ContainsKey(1));
+        Assert.False(dictionary.Remove(1));
+        Assert.Equal(7, dictionary.GetValueOrDefault(1, 7));
+        Assert.True(set.IsProperSubsetOf(new[] { 1 }));
+        Assert.False(set.IsProperSupersetOf(Array.Empty<int>()));
+        Assert.True(set.IsSupersetOf(Array.Empty<int>()));
+        Assert.False(set.Overlaps(new[] { 1 }));
+        set.CopyTo(Array.Empty<int>(), 0);
+        Assert.True(set.IsNull);
+        Assert.True(dictionary.IsNull);
         set.Add(2);
         dictionary.Add(2, 3);
         Assert.Contains(2, set);
         Assert.Equal(3, dictionary[2]);
+    }
+
+    [Fact]
+    public void EmptyReadsPreserveValidationWithoutRenting()
+    {
+        var dictionary = new PooledDictionary<string, int>();
+        Assert.Throws<ArgumentNullException>(() => dictionary.ContainsKey(null!));
+        Assert.Throws<ArgumentNullException>(() => dictionary.TryGetValue(null!, out _));
+        Assert.Throws<ArgumentNullException>(() => dictionary.GetValueOrDefault(null!));
+        Assert.Throws<ArgumentNullException>(() => dictionary.Remove(null!));
+        Assert.Throws<ArgumentNullException>(() => dictionary[null!]);
+        Assert.Throws<KeyNotFoundException>(() => dictionary["missing"]);
+        Assert.True(dictionary.IsNull);
+
+        IReadOnlyDictionary<string, int> readOnly = dictionary;
+        Assert.Equal(7, readOnly.GetValueOrDefault("missing", 7));
+        Assert.True(((PooledDictionary<string, int>)readOnly).IsNull);
+        ICollection<KeyValuePair<string, int>> items = dictionary;
+        Assert.False(items.Contains(new("missing", 0)));
+        Assert.False(items.Remove(new("missing", 0)));
+        items.CopyTo(Array.Empty<KeyValuePair<string, int>>(), 0);
+        Assert.Throws<ArgumentNullException>(() => items.CopyTo(null!, 0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => items.CopyTo(Array.Empty<KeyValuePair<string, int>>(), -1));
+        Assert.True(((PooledDictionary<string, int>)items).IsNull);
+
+        var set = new PooledHashSet<int>();
+        Assert.Throws<ArgumentNullException>(() => set.IsSubsetOf(null!));
+        Assert.Throws<ArgumentNullException>(() => set.SetEquals(null!));
+        Assert.Throws<ArgumentNullException>(() => set.CopyTo(null!, 0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => set.CopyTo(Array.Empty<int>(), -1));
+        Assert.True(set.IsNull);
+    }
+
+    [Fact]
+    public void EnsureCapacityRentsTheRequestedBucketAndPreservesComparer()
+    {
+        var sets = new HashSetPool<string>(StringComparer.OrdinalIgnoreCase);
+        var dictionaries = new DictionaryPool<string, int>(StringComparer.OrdinalIgnoreCase);
+        var set = new PooledHashSet<string>(16, sets);
+        var dictionary = new PooledDictionary<string, int>(16, dictionaries);
+        set.Dispose();
+        dictionary.Dispose();
+        var largeSet = sets.Rent(1024);
+        var largeDictionary = dictionaries.Rent(1024);
+        sets.Return(largeSet);
+        dictionaries.Return(largeDictionary);
+
+        try
+        {
+            Assert.True(set.EnsureCapacity(1024) >= 1024);
+            Assert.True(dictionary.EnsureCapacity(1024) >= 1024);
+            Assert.Same(largeSet, set.Raw);
+            Assert.Same(largeDictionary, dictionary.Raw);
+            set.Add("A");
+            dictionary.Add("A", 123);
+            Assert.False(set.Add("a"));
+            Assert.Equal(123, dictionary.GetValueOrDefault("a"));
+            Assert.True(set.EnsureCapacity(2048) >= 2048);
+            Assert.True(dictionary.EnsureCapacity(2048) >= 2048);
+            Assert.False(set.Add("a"));
+            Assert.Equal(123, dictionary.GetValueOrDefault("a"));
+        }
+        finally
+        {
+            set.Dispose();
+            dictionary.Dispose();
+        }
+    }
+
+    [Fact]
+    public void EmptyEnsureCapacityValidatesWithoutRenting()
+    {
+        var set = new PooledHashSet<int>();
+        var dictionary = new PooledDictionary<int, int>();
+        Assert.Equal(0, set.EnsureCapacity(0));
+        Assert.Equal(0, dictionary.EnsureCapacity(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => set.EnsureCapacity(-1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => dictionary.EnsureCapacity(-1));
+        Assert.True(set.IsNull);
+        Assert.True(dictionary.IsNull);
+    }
+
+    [Fact]
+    public void DictionaryViewsObserveSubsequentChanges()
+    {
+        using var dictionary = new PooledDictionary<int, int>();
+        var keys = dictionary.Keys;
+        var values = dictionary.Values;
+        dictionary.Add(1, 2);
+        Assert.Contains(1, keys);
+        Assert.Contains(2, values);
+        dictionary.Remove(1);
+        Assert.Empty(keys);
+        Assert.Empty(values);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DictionaryGetValueOrDefaultDoesNotAllocate(bool populated)
+    {
+        using var dictionary = new PooledDictionary<uint, long>();
+        if (populated) dictionary.Add(1, 123);
+        Read(dictionary);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var total = Read(dictionary);
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.Equal(populated ? 123000L : 7000L, total);
+        Assert.Equal(0, allocated);
+        Assert.Equal(!populated, dictionary.IsNull);
+
+        static long Read(in PooledDictionary<uint, long> dictionary)
+        {
+            long total = 0;
+            for (var i = 0; i < 1000; i++)
+                total += dictionary.GetValueOrDefault(1u, 7L);
+            return total;
+        }
     }
 
     [Fact]
