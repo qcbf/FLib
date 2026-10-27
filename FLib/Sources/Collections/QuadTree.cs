@@ -333,12 +333,33 @@ namespace FLib.Collections
             public void SplitToChildren()
             {
                 var size = Rect.Size;
-                var sizeHalf = size * 0.5f;
+                var splitX = 2;
+                var splitY = 2;
+                if (size.X >= size.Y * 2)
+                {
+                    splitX = 4;
+                    splitY = 1;
+                }
+                else if (size.Y >= size.X * 2)
+                {
+                    splitX = 1;
+                    splitY = 4;
+                }
+
                 Children ??= new int[4];
-                Children[0] = CreateChildNode(new FRect(Rect.Min, Rect.Max - sizeHalf), Tree, SelfIndex, Depth);
-                Children[1] = CreateChildNode(new FRect(new FVector2(Rect.Min.X + sizeHalf.X, Rect.Min.Y), new FVector2(Rect.Max.X, Rect.Max.Y - sizeHalf.Y)), Tree, SelfIndex, Depth);
-                Children[2] = CreateChildNode(new FRect(Rect.Min + sizeHalf, Rect.Max), Tree, SelfIndex, Depth);
-                Children[3] = CreateChildNode(new FRect(new FVector2(Rect.Min.X, Rect.Min.Y + sizeHalf.Y), new FVector2(Rect.Max.X - sizeHalf.X, Rect.Max.Y)), Tree, SelfIndex, Depth);
+                var childIndex = 0;
+                for (var y = 0; y < splitY; y++)
+                {
+                    var minY = Rect.Min.Y + size.Y * y / splitY;
+                    var maxY = y == splitY - 1 ? Rect.Max.Y : Rect.Min.Y + size.Y * (y + 1) / splitY;
+                    for (var x = 0; x < splitX; x++)
+                    {
+                        var minX = Rect.Min.X + size.X * x / splitX;
+                        var maxX = x == splitX - 1 ? Rect.Max.X : Rect.Min.X + size.X * (x + 1) / splitX;
+                        Children[childIndex++] = CreateChildNode(new FRect(new FVector2(minX, minY), new FVector2(maxX, maxY)), Tree, SelfIndex, Depth);
+                    }
+                }
+
                 if (ObjIndexes != null)
                 {
                     Array.Fill(TotalObjCounts, 0);

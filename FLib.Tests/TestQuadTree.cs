@@ -56,6 +56,27 @@ public class TestQuadTree
         Assert.Contains(movedObjectIndex, node.ObjIndexes[0]);
     }
 
+    [Fact]
+    public void LongRectSplitsAlongLongAxis()
+    {
+        var tree = new QuadTree<int>(new FRect(new FVector2(0, 0), new FVector2(2000, 15)))
+        {
+            MaxDepthLimit = 1,
+            SplitNodeObjectNumber = 1
+        };
+
+        tree.Add(1, new FVector2(100, 7));
+
+        Assert.True(tree.Root.HasChild);
+        Assert.Equal(4, tree.Root.Children.Length);
+        Assert.All(tree.Root.Children, childIndex =>
+        {
+            ref readonly var child = ref tree.GetNode(childIndex);
+            Assert.True(child.Rect.Height == 15);
+            Assert.True(child.Rect.Width == 500);
+        });
+    }
+
     private static int[] AssertTotalObjectCounts(QuadTree<int> tree, int nodeIndex)
     {
         ref var node = ref tree.GetNode(nodeIndex);
