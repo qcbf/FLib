@@ -92,7 +92,7 @@ namespace FLib.WorldCores
 #endif
     }
 
-    public delegate WorldEffectBase EffectHandlerDelegate(in WorldEffectSystem system, in WorldEntityId source, uint id, ushort addCount = 1);
+    public delegate WorldEffectBase EffectHandlerDelegate(in WorldEffectSystem system, in WorldEntityId source, uint id, int addCount = 1);
 
     public delegate void DestroyHandlerDelegate(in WorldEffectSystem system, WorldEffectBase effect);
 }

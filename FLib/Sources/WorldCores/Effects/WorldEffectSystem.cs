@@ -87,7 +87,7 @@ namespace FLib.WorldCores.Effects
         /// <summary>
         /// 添加效果实例到实体
         /// </summary>
-        public WorldEffectBase? Add(in WorldEntityId source, uint id, ushort addCount = 1)
+        public WorldEffectBase? Add(in WorldEntityId source, uint id, int addCount = 1)
         {
             WorldCoreException.AssertNotCopied(Entity, this);
             World.Assert(!IsDisposed);
@@ -285,7 +285,7 @@ namespace FLib.WorldCores.Effects
         /// <summary>
         /// 增加效果的层数，确保不超过最大层数限制
         /// </summary>
-        private static void AddEffectStackCount(WorldEffectBase effect, ref ushort addCount)
+        private static void AddEffectStackCount(WorldEffectBase effect, ref int addCount)
         {
             var oldCount = effect.StackCount;
             effect.StackCount = (ushort)Math.Clamp(effect.StackCount + addCount, 1, effect.MaxStackCount);
