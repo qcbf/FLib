@@ -32,7 +32,7 @@ namespace FLib
             get
             {
                 var m = Magnitude;
-                return m == 0 ? Zero : this / Magnitude;
+                return m == 0 ? Zero : this / m;
             }
         }
 
@@ -121,8 +121,10 @@ namespace FLib
             if (dx - dy == 0)
                 return point;
 
-            var x2 = dx * FNum.Cos(radian) - dy * FNum.Sin(radian);
-            var y2 = dx * FNum.Sin(radian) + dy * FNum.Cos(radian);
+            var s = FNum.Sin(radian);
+            var c = FNum.Cos(radian);
+            var x2 = dx * c - dy * s;
+            var y2 = dx * s + dy * c;
             return new FVector2(x2 + originPoint.X, y2 + originPoint.Y);
         }
 

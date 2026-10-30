@@ -1,4 +1,4 @@
-﻿//==================={By Qcbf|qcbf@qq.com|4/29/2022 3:14:28 PM}===================
+//==================={By Qcbf|qcbf@qq.com|4/29/2022 3:14:28 PM}===================
 
 // #define FIXED_POINT_NUMBER
 
@@ -54,7 +54,6 @@ namespace FLib
         public static readonly FNum MaxValue = (FNum)float.MaxValue;
         public static readonly FNum MinValue = (FNum)float.MinValue;
         public static readonly FNum PI = (FNum)MathF.PI;
-        private static readonly FNum Ln2 = (FNum)0.69315D;
         public FNum(float value) => RawValue = value;
         public FNum(ReadOnlySpan<char> str)
         {
@@ -317,6 +316,7 @@ namespace FLib
         /// Performs multiplication without checking for overflow.
         /// Useful for performance-critical code where the values are guaranteed not to cause overflow
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FNum FastMul(FNum x, FNum y)
         {
 #if FIXED_POINT_NUMBER
@@ -351,17 +351,32 @@ namespace FLib
         private static int CountLeadingZeroes(ulong x)
         {
             var result = 0;
-            while ((x & 0xF000000000000000) == 0)
+            if ((x >> 32) == 0)
+            {
+                result += 32;
+                x <<= 32;
+            }
+            if ((x >> 48) == 0)
+            {
+                result += 16;
+                x <<= 16;
+            }
+            if ((x >> 56) == 0)
+            {
+                result += 8;
+                x <<= 8;
+            }
+            if ((x >> 60) == 0)
             {
                 result += 4;
                 x <<= 4;
             }
-            while ((x & 0x8000000000000000) == 0)
+            if ((x >> 62) == 0)
             {
-                result += 1;
-                x <<= 1;
+                result += 2;
+                x <<= 2;
             }
-            return result;
+            return result + ((x >> 63) == 0 ? 1 : 0);
         }
 
         public static FNum operator /(FNum x, FNum y)
@@ -490,7 +505,7 @@ namespace FLib
 
             return result;
 #else
-            return (FNum)MathF.Pow(x, 2);
+            return (FNum)MathF.Pow(2, x);
 #endif
         }
 
@@ -553,7 +568,11 @@ namespace FLib
         /// </exception>
         public static FNum Ln(FNum x)
         {
+#if FIXED_POINT_NUMBER
             return FastMul(Log2(x), Ln2);
+#else
+            return (FNum)MathF.Log(x);
+#endif
         }
 
         /// <summary>
@@ -736,9 +755,12 @@ namespace FLib
             // Whereas simply doing x % PI_TIMES_2 is the 2e-3 range.
 
             var clamped2Pi = angle;
-            for (var i = 0; i < 29; ++i)
+            if (angle <= -PI_TIMES_2 || angle >= PI_TIMES_2)
             {
-                clamped2Pi %= largePI >> i;
+                for (var i = 0; i < 29; ++i)
+                {
+                    clamped2Pi %= largePI >> i;
+                }
             }
             if (angle < 0)
             {
