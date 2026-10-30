@@ -29,7 +29,7 @@ namespace FLib
         private static readonly FNum Log2Max = new(LOG2MAX);
         private static readonly FNum Log2Min = new(LOG2MIN);
         private static readonly FNum Ln2 = new(LN2);
-        private static readonly FNum LutInterval = (LUT_SIZE - 1) / PiOver2;
+        private static readonly FNum TanLutInterval = (TAN_LUT_SIZE - 1) / PiOver2;
         private const int NUM_BITS = 64;
         private const long PI_TIMES_2 = 0x6487ED511;
         private const long MAX_VALUE = long.MaxValue;
@@ -41,7 +41,10 @@ namespace FLib
         private const long LN2 = 0xB17217F7;
         private const long LOG2MAX = 0x1F00000000;
         private const long LOG2MIN = -0x2000000000;
-        private const int LUT_SIZE = (int)(PI_OVER_2 >> 15);
+        private const int SIN_LUT_SHIFT = 25;
+        private const long SIN_LUT_MASK = (1L << SIN_LUT_SHIFT) - 1;
+        private const long SIN_LUT_ROUND = 1L << (SIN_LUT_SHIFT - 1);
+        private const int TAN_LUT_SIZE = (int)(PI_OVER_2 >> 15);
         public FNum(long rawValue) => RawValue = rawValue;
         public FNum(ReadOnlySpan<char> str)
         {
@@ -693,27 +696,14 @@ namespace FLib
 
         /// <summary>
         /// Returns the Sine of x.
-        /// The relative error is less than 1E-10 for x in [-2PI, 2PI], and less than 1E-7 in the worst case.
+        /// The measured absolute error is below 1E-9 for x in [-2PI, 2PI] on the fixed-point path.
         /// </summary>
         public static FNum Sin(FNum x)
         {
 #if FIXED_POINT_NUMBER
             var clampedL = ClampSinValue(x.RawValue, out var flipHorizontal, out var flipVertical);
-            var clamped = new FNum(clampedL);
-
-            // Find the two closest values in the LUT and perform linear interpolation
-            // This is what kills the performance of this function on x86 - x64 is fine though
-            var rawIndex = FastMul(clamped, LutInterval);
-            var roundedIndex = (int)Round(rawIndex);
-            var indexError = FastSub(rawIndex, roundedIndex);
-
-            var nearestValue = new FNum(LUT.SinLut[flipHorizontal ? LUT.SinLut.Length - 1 - roundedIndex : roundedIndex]);
-            var secondNearestValue = new FNum(LUT.SinLut[flipHorizontal ? LUT.SinLut.Length - 1 - roundedIndex - Sign(indexError) : roundedIndex + Sign(indexError)]);
-
-            var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue))).RawValue;
-            var interpolatedValue = nearestValue.RawValue + (flipHorizontal ? -delta : delta);
-            var finalValue = flipVertical ? -interpolatedValue : interpolatedValue;
-            return new FNum(finalValue);
+            var value = SinLutValue(flipHorizontal ? PI_OVER_2 - clampedL : clampedL);
+            return new FNum(flipVertical ? -value : value);
 #else
             return (FNum)MathF.Sin(x);
 #endif
@@ -721,29 +711,48 @@ namespace FLib
 
         /// <summary>
         /// Returns a rough approximation of the Sine of x.
-        /// This is at least 3 times faster than Sin() on x86 and slightly faster than Math.Sin(),
-        /// however its accuracy is limited to 4-5 decimals, for small enough values of x.
+        /// It uses linear interpolation over the compact sine table and trades accuracy for throughput.
+        /// Its accuracy is limited to roughly 4-5 decimal places for small enough values of x.
         /// </summary>
         public static FNum FastSin(FNum x)
         {
 #if FIXED_POINT_NUMBER
             var clampedL = ClampSinValue(x.RawValue, out var flipHorizontal, out var flipVertical);
-
-            // Here we use the fact that the SinLut table has a number of entries
-            // equal to (PI_OVER_2 >> 15) to use the angle to index directly into it
-            var rawIndex = (uint)(clampedL >> 15);
-            if (rawIndex >= LUT_SIZE)
-            {
-                rawIndex = LUT_SIZE - 1;
-            }
-            var nearestValue = LUT.SinLut[flipHorizontal ? LUT.SinLut.Length - 1 - (int)rawIndex : (int)rawIndex];
-            return new FNum(flipVertical ? -nearestValue : nearestValue);
+            var value = FastSinLutValue(flipHorizontal ? PI_OVER_2 - clampedL : clampedL);
+            return new FNum(flipVertical ? -value : value);
 #else
             return (FNum)MathF.Sin(x);
 #endif
         }
 
 #if FIXED_POINT_NUMBER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static long SinLutValue(long value)
+        {
+            ref readonly var segment = ref SinLut.Values[(int)(value >> SIN_LUT_SHIFT)];
+            var fraction = value & SIN_LUT_MASK;
+            var c = segment.C;
+            var b = segment.B + (fraction * c + SIN_LUT_ROUND >> SIN_LUT_SHIFT);
+            var a = segment.A + (fraction * b + SIN_LUT_ROUND >> SIN_LUT_SHIFT);
+            var result = (long)segment.Y + (fraction * a + SIN_LUT_ROUND >> SIN_LUT_SHIFT);
+            return result > ONE ? ONE : result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static long FastSinLutValue(long value)
+        {
+            var index = (int)(value >> SIN_LUT_SHIFT);
+            if (index >= SinLut.Values.Length - 1)
+            {
+                return ONE;
+            }
+
+            var fraction = value & SIN_LUT_MASK;
+            var start = SinLut.Values[index].Y;
+            var delta = (long)SinLut.Values[index + 1].Y - start;
+            return start + (delta * fraction >> SIN_LUT_SHIFT);
+        }
+
         private static long ClampSinValue(long angle, out bool flipHorizontal, out bool flipVertical)
         {
             const long largePI = 7244019458077122842;
@@ -789,7 +798,7 @@ namespace FLib
 
         /// <summary>
         /// Returns the cosine of x.
-        /// The relative error is less than 1E-10 for x in [-2PI, 2PI], and less than 1E-7 in the worst case.
+        /// The measured absolute error is below 1E-9 for x in [-2PI, 2PI] on the fixed-point path.
         /// </summary>
         public static FNum Cos(FNum x)
         {
@@ -842,12 +851,12 @@ namespace FLib
             var clamped = new FNum(clampedPi);
 
             // Find the two closest values in the LUT and perform linear interpolation
-            var rawIndex = FastMul(clamped, LutInterval);
+            var rawIndex = FastMul(clamped, TanLutInterval);
             var roundedIndex = (int)Round(rawIndex);
             var indexError = FastSub(rawIndex, roundedIndex);
 
-            var nearestValue = new FNum(LUT.TanLut[roundedIndex]);
-            var secondNearestValue = new FNum(LUT.TanLut[roundedIndex + Sign(indexError)]);
+            var nearestValue = new FNum(TanLut.Values[roundedIndex]);
+            var secondNearestValue = new FNum(TanLut.Values[roundedIndex + Sign(indexError)]);
 
             var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue))).RawValue;
             var interpolatedValue = nearestValue.RawValue + delta;
