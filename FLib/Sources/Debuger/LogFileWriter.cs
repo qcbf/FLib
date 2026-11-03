@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +14,11 @@ namespace FLib
     public class LogFileWriter : LogWriter
     {
         public string FilePath;
-        public int MaxSize = 1024 * 1024 * 128;
+        /// <summary>Maximum size of the active file before it is rotated.</summary>
+        public long MaxSize = 64L * 1024 * 1024;
+
+        /// <summary>Maximum number of files kept, including the active file.</summary>
+        public int MaxFileCount = 15;
 
         public FileStream Stream;
 
@@ -38,6 +43,7 @@ namespace FLib
                 Stream.Dispose();
                 File.Move(FilePath, IOUtility.PathRename(FilePath, $".bak{TimeHelper.Timestamp}", true));
                 AllocStream();
+                CleanupBackups();
             }
 
             var enc = StringFLibUtility.Encoding;
@@ -58,7 +64,27 @@ namespace FLib
         /// </summary>
         private void AllocStream()
         {
+            var directory = Path.GetDirectoryName(FilePath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
             Stream = new FileStream(FilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 16 * 1024);
+        }
+
+        private void CleanupBackups()
+        {
+            var directory = Path.GetDirectoryName(FilePath);
+            if (string.IsNullOrEmpty(directory))
+                directory = Directory.GetCurrentDirectory();
+
+            var fileName = Path.GetFileName(FilePath);
+            var extension = Path.GetExtension(fileName);
+            var stem = Path.GetFileNameWithoutExtension(fileName) + ".bak";
+            var backups = Directory.EnumerateFiles(directory, stem + "*" + extension, SearchOption.TopDirectoryOnly)
+                .OrderBy(File.GetLastWriteTimeUtc)
+                .ToList();
+            var keepBackups = Math.Max(0, Math.Max(1, MaxFileCount) - 1);
+            for (var i = 0; i < backups.Count - keepBackups; ++i)
+                File.Delete(backups[i]);
         }
 
         /// <summary>
