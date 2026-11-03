@@ -85,6 +85,57 @@ public class TestSerialization
         Assert.Equal(pack2.Bytes, BytesPack.Unpack<ScriptPackBytes>(BytesPack.Pack(pack2)).Bytes);
     }
 
+    [Theory]
+    [InlineData("\"\\\"\\'\\\\\\/\"", "\"'\\/")]
+    [InlineData("'\\b\\f\\n\\r\\t\\v\\0'", "\b\f\n\r\t\v\0")]
+    [InlineData("'\\x41\\u4F60\\u597d'", "A你好")]
+    [InlineData("'\\uD83D\\uDE00'", "😀")]
+    [InlineData("'\\\\n'", "\\n")]
+    [InlineData("'\\q'", "q")]
+    [InlineData("'  text  '", "  text  ")]
+    [InlineData("'   '", "   ")]
+    [InlineData("''", "")]
+    [InlineData("path\\file", "path\\file")]
+    public void Json5UnescapesQuotedStrings(string source, string expected)
+    {
+        Assert.Equal(expected, Json5.Deserialize<string>(source));
+        Assert.Equal(expected, Json5.Deserialize(source));
+    }
+
+    [Theory]
+    [InlineData("\n")]
+    [InlineData("\r")]
+    [InlineData("\r\n")]
+    [InlineData("\u2028")]
+    [InlineData("\u2029")]
+    public void Json5UnescapesLineContinuations(string newline)
+    {
+        Assert.Equal("ab", Json5.Deserialize<string>("'a\\" + newline + "b'"));
+    }
+
+    [Theory]
+    [InlineData("'\\x1'")]
+    [InlineData("'\\u12X4'")]
+    [InlineData("'\\1'")]
+    [InlineData("'\\01'")]
+    public void Json5RejectsInvalidEscapes(string source)
+    {
+        var exception = Assert.ThrowsAny<Exception>(() => Json5.Deserialize<string>(source));
+        Assert.IsType<FormatException>(exception.GetBaseException());
+    }
+
+    [Fact]
+    public void Json5StringEscapesRoundTrip()
+    {
+        const string value = "quote\"\\n\\\n  ";
+        Assert.Equal(value, Json5.Deserialize<string>(Json5.Serialize(value)));
+        Assert.Equal("a\n", Json5.Deserialize<Json5ExistingObjectData>("{'\\u004eame':'a\\n'}").Name);
+        using var nodes = Json5.DeserializeToSyntaxNodes("'a\\n'");
+        Assert.Equal("a\\n", nodes[0].ContentCopyString);
+        var dict = new Dictionary<string, string> { ["path\\name"] = "value" };
+        Assert.Equal(dict, Json5.Deserialize<Dictionary<string, string>>(Json5.Serialize(dict, EJson5SerializeOption.Compatible)));
+    }
+
     [Fact]
     public void Json5DeserializeToExistingObject()
     {
