@@ -62,22 +62,24 @@ namespace FLib
         /// <summary> 格式化时间 </summary>
         public static StringBuilder FormatSeconds(StringBuilder strbuf, int seconds, string dayText = "d ", string hourText = "h ", string minuteText = "m ", string secondText = "s")
         {
+            if (seconds == 0)
+                return strbuf.Append(0).Append(secondText);
+
             var days = seconds / 86400;
             seconds -= days * 86400;
             var hours = seconds / 3600;
             seconds -= hours * 3600;
             var minutes = seconds / 60;
             seconds -= minutes * 60;
-            var hasHour = days > 0 || hours > 0;
-            var hasMinute = hasHour || minutes > 0;
 
             if (days > 0)
                 strbuf.Append(days).Append(dayText);
-            if (hasHour)
+            if (hours > 0)
                 strbuf.Append(hours).Append(hourText);
-            if (hasMinute)
+            if (minutes > 0)
                 strbuf.Append(minutes).Append(minuteText);
-            strbuf.Append(seconds).Append(secondText);
+            if (seconds > 0)
+                strbuf.Append(seconds).Append(secondText);
             return strbuf;
         }
     }
