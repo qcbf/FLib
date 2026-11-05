@@ -118,7 +118,7 @@ namespace FLib
         {
             var dx = point.X - originPoint.X;
             var dy = point.Y - originPoint.Y;
-            if (dx - dy == 0)
+            if (dx == 0 && dy == 0)
                 return point;
 
             var s = FNum.Sin(radian);

@@ -63,6 +63,24 @@ public class TestFNum
         Assert.InRange(Math.Abs((double)rotated.Y - expectedY), 0, 2e-6);
     }
 
+    [Theory]
+    [InlineData(7, 1, 4, -6)]
+    [InlineData(7, -1, 18, -20)]
+    [InlineData(7, 2, 4, -20)]
+    [InlineData(-7, 1, 18, -20)]
+    [InlineData(-7, -1, 4, -6)]
+    [InlineData(0, 1, 11, -13)]
+    public void RotateAroundPointHandlesEqualAxisOffsets(double offset, int quarterTurns, double expectedX, double expectedY)
+    {
+        var origin = new FVector2(11, -13);
+        var point = origin + new FVector2((FNum)offset, (FNum)offset);
+
+        var rotated = FVector2.Rotate(point, origin, FNum.PI / 2 * quarterTurns);
+
+        Assert.InRange(Math.Abs((double)rotated.X - expectedX), 0, 2e-6);
+        Assert.InRange(Math.Abs((double)rotated.Y - expectedY), 0, 2e-6);
+    }
+
 #if FIXED_POINT_NUMBER
     [Fact]
     public void DivisionMatchesRoundedIntegerReferenceAcrossBitPositions()
