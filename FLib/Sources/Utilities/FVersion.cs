@@ -51,7 +51,7 @@ namespace FLib
             {
                 if (versionChars[i] == '.')
                 {
-                    versions[versionIndex++] = new Range(start, i - 1);
+                    versions[versionIndex++] = new Range(start, i);
                     start = (byte)(i + 1);
                 }
             }
