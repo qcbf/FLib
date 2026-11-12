@@ -77,6 +77,76 @@ public class TestQuadTree
         });
     }
 
+    [Fact]
+    public void EarlyExitDoesNotRepeatNodesOnNextTraversal()
+    {
+        var tree = CreateSplitTree();
+        foreach (var node in tree)
+        {
+            if (node.ContinueChildren())
+                break;
+        }
+
+        var visited = new List<int>();
+        foreach (var node in tree)
+        {
+            visited.Add(node.NodeIndex);
+            node.ContinueChildren();
+        }
+
+        Assert.Equal(5, visited.Count);
+        Assert.Equal(5, visited.Distinct().Count());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void InterruptedTraversalDoesNotLeakNodesToAnotherTree(bool throwFromLoop)
+    {
+        var tree = CreateSplitTree();
+        if (throwFromLoop)
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                foreach (var node in tree)
+                {
+                    if (node.ContinueChildren())
+                        throw new InvalidOperationException();
+                }
+            });
+        }
+        else
+        {
+            foreach (var node in tree)
+            {
+                if (node.ContinueChildren())
+                    break;
+            }
+        }
+
+        var smallerTree = new QuadTree<int>(new FRect(new FVector2(0, 0), new FVector2(100, 100)));
+        var visited = new List<int>();
+        foreach (var node in smallerTree)
+        {
+            visited.Add(node.NodeIndex);
+            node.ContinueChildren();
+        }
+
+        Assert.Equal([0], visited);
+    }
+
+    private static QuadTree<int> CreateSplitTree()
+    {
+        var tree = new QuadTree<int>(new FRect(new FVector2(0, 0), new FVector2(100, 100)))
+        {
+            MaxDepthLimit = 1,
+            SplitNodeObjectNumber = 2
+        };
+        tree.Add(1, new FVector2(10, 10));
+        tree.Add(2, new FVector2(90, 90));
+        return tree;
+    }
+
     private static int[] AssertTotalObjectCounts(QuadTree<int> tree, int nodeIndex)
     {
         ref var node = ref tree.GetNode(nodeIndex);

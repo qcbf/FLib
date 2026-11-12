@@ -448,7 +448,11 @@ namespace FLib.Collections
             {
             }
 
-            public void Dispose() => GlobalObjectPool<Stack<int>>.Release(Children);
+            public void Dispose()
+            {
+                Children.Clear();
+                GlobalObjectPool<Stack<int>>.Release(Children);
+            }
             public NodeEnumerator GetEnumerator() => this;
             IEnumerator IEnumerable.GetEnumerator() => this;
             IEnumerator<Item> IEnumerable<Item>.GetEnumerator() => this;
