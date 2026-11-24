@@ -645,7 +645,7 @@ namespace FLib
 
 
 #if DEBUG
-        private const int DebugMaxSerializeDepth = 128;
+        private const int DebugMaxSerializeDepth = 32;
         [ThreadStatic] private static int _debugSerializeDepth;
 
         private static DebugSerializeScope EnterDebugSerialize(object? value)
