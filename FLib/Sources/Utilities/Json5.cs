@@ -281,6 +281,9 @@ namespace FLib
 
         private static void PushArray(IEnumerable array, StringBuilder strbuf, int indent, Json5SerializeOptionData opData, bool prettyForceMultiLine)
         {
+            if (PushExcludedValue(array, strbuf, opData))
+                return;
+
             IEnumerator iterator;
             try
             {
@@ -367,6 +370,9 @@ namespace FLib
 
         private static void PushDict(IDictionary dict, StringBuilder strbuf, int indent, Json5SerializeOptionData opData, bool prettyForceMultiLine)
         {
+            if (PushExcludedValue(dict, strbuf, opData))
+                return;
+
             // ReSharper disable AssignNullToNotNullAttribute
             // ReSharper disable GenericEnumeratorNotDisposed
             if (opData.Op(EJson5SerializeOption.Pretty))
@@ -436,6 +442,9 @@ namespace FLib
 
         private static void PushObject(object obj, StringBuilder strbuf, int indent, Json5SerializeOptionData opData, object? customData, bool prettyForceMultiLine)
         {
+            if (PushExcludedValue(obj, strbuf, opData))
+                return;
+
             var t = obj.GetType();
             var meta = TypeMetaCache.GetOrAdd(t, static type => new TypeSerializeMeta(type));
             // LogText 下尊重类型自己的 ToString，避免日志递归展开复杂对象图。
@@ -485,7 +494,7 @@ namespace FLib
             {
                 // 保持反射序列化的边界：跳过只读/常量、显式非序列化类型、委托和 NonSerialized 字段。
                 if (field.IsInitOnly || field.IsLiteral || ((opData.Options & EJson5SerializeOption.OnlySerializableFields) != 0 && !field.IsDefined(typeof(SerializableAttribute))) ||
-                    (Json5.NonSerialized != null && (Json5.NonSerialized.Contains(field.FieldType) || Json5.NonSerialized.Contains(field.FieldType.BaseType!))) ||
+                    (Json5.NonSerialized is { } excludedTypes && IsExcludedType(field.FieldType, excludedTypes)) ||
                     field.IsDefined(typeof(NonSerializedAttribute)) || field.FieldType.IsSubclassOf(typeof(Delegate)))
                     return false;
 
@@ -511,6 +520,28 @@ namespace FLib
 
                 return false;
             }
+        }
+
+        private static bool PushExcludedValue(object value, StringBuilder strbuf, Json5SerializeOptionData opData)
+        {
+            if (Json5.NonSerialized is not { } excludedTypes || !IsExcludedType(value.GetType(), excludedTypes))
+                return false;
+
+            if (opData.Op(EJson5SerializeOption.LogText))
+                strbuf.Append(value);
+            else
+                strbuf.Append("null");
+            return true;
+        }
+
+        private static bool IsExcludedType(Type type, HashSet<Type> excludedTypes)
+        {
+            foreach (var excludedType in excludedTypes)
+            {
+                if (excludedType.IsAssignableFrom(type))
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>

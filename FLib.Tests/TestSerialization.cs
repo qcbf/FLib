@@ -1,5 +1,6 @@
 // ==================== qcbf@qq.com | 2026-03-26 ====================
 
+using System.Runtime.CompilerServices;
 #if DEBUG
 using System.Text;
 #endif
@@ -188,6 +189,26 @@ public class TestSerialization
 
         Assert.Same(list, result);
         Assert.Equal([1, 2, 3], list);
+    }
+
+    [Fact]
+    public void Json5HonorsRegisteredBaseTypeForDerivedValues()
+    {
+        var previousExclusions = Json5.NonSerialized;
+        Json5.NonSerialized = new HashSet<Type> { typeof(Exception) };
+        try
+        {
+            var value = new ArgumentNullException("value");
+            Assert.Equal("null", Json5.Serialize(value));
+            Assert.Equal("{}", Json5.Serialize(new StrongBox<ArgumentNullException>(value)));
+            Assert.Equal("{Value:null}", Json5.Serialize(new StrongBox<object>(value)));
+            Assert.Equal("[null,1]", Json5.Serialize(new object[] { value, 1 }));
+            Assert.Equal(value.ToString(), Json5.SerializeToLog(value));
+        }
+        finally
+        {
+            Json5.NonSerialized = previousExclusions;
+        }
     }
 
 #if DEBUG
