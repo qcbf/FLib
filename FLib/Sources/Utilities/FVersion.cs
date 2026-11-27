@@ -8,37 +8,42 @@ using System.Text;
 namespace FLib
 {
     /// <summary>
-    /// 轻巧的version结构
-    /// note:   max value 
-    /// <c>[major,255,8bit] | [minor,1023,10bit] | [patch,16383,14bit]</c>
+    /// 32 位版本号，依次存储 8 位 major、11 位 minor 和 13 位 patch。
+    /// 版本号上限为 <c>255.2047.8191</c>。
     /// </summary>
-    public struct FVersion : IJson5Deserializable
+    public struct FVersion : IJson5Deserializable, IJson5Serializable
     {
+        private const int PatchBits = 13;
+        private const int MinorBits = 11;
+        private const int MajorShift = PatchBits + MinorBits;
+        private const int PatchMask = (1 << PatchBits) - 1;
+        private const int MinorMask = (1 << MinorBits) - 1;
+
         private int _value;
 
         public byte Major
         {
-            readonly get => (byte)(_value >> 24);
-            set => _value = (value << 24) | (_value & 0x00ffffff);
+            readonly get => (byte)(_value >> MajorShift);
+            set => _value = (value << MajorShift) | (_value & ((1 << MajorShift) - 1));
         }
 
         public ushort Minor
         {
-            readonly get => (ushort)((_value & 0xffc000) >> 14);
+            readonly get => (ushort)((_value >> PatchBits) & MinorMask);
             set
             {
-                Log.Assert(value <= 1023);
-                _value = value << 14 | (int)(_value & 0xff003fff);
+                Log.Assert(value <= MinorMask);
+                _value = (value << PatchBits) | (_value & ~(MinorMask << PatchBits));
             }
         }
 
         public ushort Patch
         {
-            readonly get => (ushort)(_value & 0x3fff);
+            readonly get => (ushort)(_value & PatchMask);
             set
             {
-                Log.Assert(value <= 16383);
-                _value = value | (int)(_value & 0xffffc000);
+                Log.Assert(value <= PatchMask);
+                _value = value | (_value & ~PatchMask);
             }
         }
 
@@ -56,22 +61,33 @@ namespace FLib
                 }
             }
 
-            _value = (versionChars[versions[0]].ToByte() << 24) | (versionChars[versions[1]].ToUShort() << 14) | versionChars[start..].ToUShort();
+            _value = (versionChars[versions[0]].ToByte() << MajorShift) | (versionChars[versions[1]].ToUShort() << PatchBits) | versionChars[start..].ToUShort();
         }
 
         public FVersion(byte major, ushort minor, ushort patch)
         {
-            _value = (major << 24) | (minor << 14) | patch;
+            _value = (major << MajorShift) | (minor << PatchBits) | patch;
         }
 
-        public readonly Version ConvertSystemVersion()
+        /// <summary>
+        /// 按现有位宽增加版本号，低位溢出时自动进位。
+        /// </summary>
+        /// <exception cref="OverflowException">进位后的主版本号超过 255。</exception>
+        public readonly FVersion SafeAdd(uint major, uint minor, uint patch)
         {
-            return new Version(Major, Minor, Patch);
+            var packedSum = unchecked((uint)_value) + ((ulong)major << MajorShift) + ((ulong)minor << PatchBits) + patch;
+            if (packedSum > uint.MaxValue)
+                throw new OverflowException("The major version cannot exceed 255.");
+            return unchecked((int)packedSum);
         }
 
         public readonly override string ToString()
+            => Major.ToString() + '.' + Minor + '.' + Patch;
+
+        readonly bool IJson5Serializable.JsonSerialize(StringBuilder jsonText, object serializeObject, object customData, int indent, Json5SerializeOptionData opData)
         {
-            return Major.ToString() + '.' + Minor + '.' + Patch;
+            Json5Serializer.PushValue(ToString(), jsonText, indent, opData);
+            return true;
         }
 
         public Json5CustomDeserializeResult JsonDeserialize(ref Json5SyntaxNodes nodes, object otherData, in Json5DeserializeOptionData options)
@@ -101,5 +117,6 @@ namespace FLib
 
         public static implicit operator int(FVersion v) => v._value;
         public static implicit operator FVersion(int v) => new() { _value = v };
+        public static implicit operator Version(FVersion v) => new(v.Major, v.Minor, v.Patch);
     }
 }
