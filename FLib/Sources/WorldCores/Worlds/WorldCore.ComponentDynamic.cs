@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using FLib.WorldCores.Entities;
 using FLib.WorldCores.Components;
+using FLib.WorldCores.SoaComponents;
 
 namespace FLib.WorldCores
 {
@@ -62,31 +63,53 @@ namespace FLib.WorldCores
         /// <returns>返回组件在动态组件组中的索引</returns>
         internal int SetDyn<T>(WorldEntityId et, in T component, ref WorldEntityInfo eti)
         {
-            Assert(!WorldComponentRegistry.GetInfo(typeof(T)).IsShared, et);
             var id = WorldComponentRegistry.GetId<T>();
-            ref var slot = ref EnsureDynamicComponentIndex(id, ref eti);
-            var group = DynComponentGroups.Get<T>();
-            if (slot < 0)
+            ref readonly var info = ref WorldComponentGenericMap<T>.Info;
+            Assert(!info.IsShared, et);
+            var group = (WorldSoaComponentGroup<T>)DynComponentGroups.Get(id);
+            var sparseIndex = eti.DynamicComponentSparseIndex;
+            var componentId = id.Id;
+            int[]? sparseBuffer = null;
+            var index = -1;
+            if (sparseIndex >= 0)
             {
-                Assert(!eti.IsDestroying, et, "entity is destroying");
-                TryAddRequiredComponents(et, WorldComponentRegistry.GetInfo(typeof(T)));
-                slot = group.Alloc(et, component);
-            }
-            else
-            {
-                ref readonly var info = ref WorldComponentRegistry.GetInfo<T>();
-                if (info.IsAwakeComponent || (info.IsDestroyComponent && info.Flags(EComponentFlag.AlwaysReceiveDestroy)))
+                ref var sparse = ref DynamicComponentSparse.GetRef(sparseIndex);
+                if (componentId < sparse.Count)
                 {
-                    group.Free(et, slot, false);
-                    slot = group.Alloc(et, component);
-                }
-                else
-                {
-                    group[slot] = component;
+                    sparseBuffer = sparse.Buffer;
+                    index = sparseBuffer[componentId];
                 }
             }
 
-            return slot;
+            if (index < 0)
+            {
+                Assert(!eti.IsDestroying, et, "entity is destroying");
+                if (info.Options?.RequiredComponents is { Length: > 0 })
+                {
+                    sparseBuffer = null;
+                    TryAddRequiredComponents(et, info);
+                }
+            }
+            else if (info.IsAwakeComponent || (info.IsDestroyComponent && info.Flags(EComponentFlag.AlwaysReceiveDestroy)))
+            {
+                sparseBuffer = null;
+                group.Free(et, index, false);
+            }
+            else
+            {
+                group[index] = component;
+                return index;
+            }
+
+            var componentCapacity = group.Components.Length;
+            index = group.AllocWithoutAwake(et, component);
+            // 分配期间进入虚方法 EnsureCapacity 时，sparse 可能已经扩容。
+            if (sparseBuffer != null && index < componentCapacity)
+                sparseBuffer[componentId] = index;
+            else
+                EnsureDynamicComponentIndex(id, ref GetEntityInfo(et)) = index;
+            group.InvokeAwake(et, index);
+            return index;
         }
 
         /// <summary>

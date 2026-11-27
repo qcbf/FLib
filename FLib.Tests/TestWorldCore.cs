@@ -12,6 +12,7 @@ using System.Reflection;
 using FLib.WorldCores.Components;
 using FLib.WorldCores;
 using FLib.WorldCores.Entities;
+using FLib.WorldCores.SoaComponents;
 using FLib.WorldCores.TimeLogics;
 
 namespace FLib.Tests;
@@ -229,6 +230,60 @@ public class TestWorldCore
             world.DynComponentGroups.Get<Managed>()[0].Values);
 
         Assert.Null(world.DynComponentGroups.Get<Player>()[0].Name);
+    }
+
+    private struct GrowsSparseOnAwake : IWorldAwake
+    {
+        public bool HasSelfOnAwake;
+
+        public void OnComponentAwake(WorldCore world, WorldEntityId entityId)
+        {
+            HasSelfOnAwake = world.HasDyn<GrowsSparseOnAwake>(entityId);
+            var sparseIndex = world.GetEntityInfo(entityId).DynamicComponentSparseIndex;
+            ref var sparse = ref world.DynamicComponentSparse.GetRef(sparseIndex);
+            sparse.Allocate(sparse.Buffer.Length + 1);
+        }
+    }
+
+    [Fact]
+    public void SetDynKeepsIndexWhenAwakeGrowsSparse()
+    {
+        using var world = new WorldCore();
+        var et = world.CreateEntityBuilder().Build();
+
+        world.SetDyn(et, new GrowsSparseOnAwake());
+
+        Assert.True(world.HasDyn<GrowsSparseOnAwake>(et));
+        Assert.True(world.GetDyn<GrowsSparseOnAwake>(et).HasSelfOnAwake);
+    }
+
+    private sealed class BuffGroupThatGrowsSparse(WorldCore world, WorldEntityId entityId) : WorldSoaComponentGroup<Buff>(world)
+    {
+        public override bool EnsureCapacity(int capacity)
+        {
+            var sparseIndex = World.GetEntityInfo(entityId).DynamicComponentSparseIndex;
+            ref var sparse = ref World.DynamicComponentSparse.GetRef(sparseIndex);
+            sparse.Allocate(sparse.Buffer.Length + 1);
+            return base.EnsureCapacity(capacity);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SetDynKeepsIndexForExistingSparseSlot(bool resizeDuringAllocation)
+    {
+        using var world = new WorldCore();
+        var et = world.CreateEntityBuilder().Build();
+        world.SetDyn(et, new Buff());
+        world.RemoveDyn<Buff>(et);
+        if (resizeDuringAllocation)
+            world.DynComponentGroups.Groups[WorldComponentRegistry.GetId<Buff>()] = new BuffGroupThatGrowsSparse(world, et);
+
+        world.SetDyn(et, new Buff { Name = "updated" });
+
+        Assert.True(world.HasDyn<Buff>(et));
+        Assert.Equal("updated", world.GetDyn<Buff>(et).Name);
     }
 
     [Fact]
