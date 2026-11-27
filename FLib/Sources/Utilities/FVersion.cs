@@ -14,31 +14,31 @@ namespace FLib
     /// </summary>
     public struct FVersion : IJson5Deserializable
     {
-        private int mValue;
+        private int _value;
 
         public byte Major
         {
-            readonly get => (byte)(mValue >> 24);
-            set => mValue = (value << 24) | (mValue & 0x00ffffff);
+            readonly get => (byte)(_value >> 24);
+            set => _value = (value << 24) | (_value & 0x00ffffff);
         }
 
         public ushort Minor
         {
-            readonly get => (ushort)((mValue & 0xffc000) >> 14);
+            readonly get => (ushort)((_value & 0xffc000) >> 14);
             set
             {
                 Log.Assert(value <= 1023);
-                mValue = value << 14 | (int)(mValue & 0xff003fff);
+                _value = value << 14 | (int)(_value & 0xff003fff);
             }
         }
 
         public ushort Patch
         {
-            readonly get => (ushort)(mValue & 0x3fff);
+            readonly get => (ushort)(_value & 0x3fff);
             set
             {
                 Log.Assert(value <= 16383);
-                mValue = value | (int)(mValue & 0xffffc000);
+                _value = value | (int)(_value & 0xffffc000);
             }
         }
 
@@ -55,12 +55,13 @@ namespace FLib
                     start = (byte)(i + 1);
                 }
             }
-            mValue = (versionChars[versions[0]].ToByte() << 24) | (versionChars[versions[1]].ToUShort() << 14) | versionChars[start..].ToUShort();
+
+            _value = (versionChars[versions[0]].ToByte() << 24) | (versionChars[versions[1]].ToUShort() << 14) | versionChars[start..].ToUShort();
         }
 
         public FVersion(byte major, ushort minor, ushort patch)
         {
-            mValue = (major << 24) | (minor << 14) | patch;
+            _value = (major << 24) | (minor << 14) | patch;
         }
 
         public readonly Version ConvertSystemVersion()
@@ -81,6 +82,7 @@ namespace FLib
                 this = new FVersion(node.ContentSpan);
                 return true;
             }
+
             Major = node.ContentSpan.ToByte();
             if (node.Token != EJson5Token.Close && nodes.TryMoveNextValueOrCloseToken(out node))
                 Minor = node.ContentSpan.ToUShort();
@@ -89,15 +91,15 @@ namespace FLib
             return true;
         }
 
-        public readonly override bool Equals(object obj) => obj is FVersion ver && ver.mValue == mValue;
-        public readonly override int GetHashCode() => mValue.GetHashCode();
+        public readonly override bool Equals(object obj) => obj is FVersion ver && ver._value == _value;
+        public readonly override int GetHashCode() => _value.GetHashCode();
 
-        public static bool operator ==(FVersion left, FVersion right) => left.mValue == right.mValue;
+        public static bool operator ==(FVersion left, FVersion right) => left._value == right._value;
         public static FVersion operator +(FVersion left, FVersion right) => new((byte)(left.Major + right.Major), (ushort)(left.Minor + right.Minor), (ushort)(left.Patch + right.Patch));
         public static FVersion operator -(FVersion left, FVersion right) => new((byte)(left.Major - right.Major), (ushort)(left.Minor - right.Minor), (ushort)(left.Patch - right.Patch));
-        public static bool operator !=(FVersion left, FVersion right) => left.mValue != right.mValue;
+        public static bool operator !=(FVersion left, FVersion right) => left._value != right._value;
 
-        public static implicit operator int(FVersion v) => v.mValue;
-        public static implicit operator FVersion(int v) => new() { mValue = v };
+        public static implicit operator int(FVersion v) => v._value;
+        public static implicit operator FVersion(int v) => new() { _value = v };
     }
 }
